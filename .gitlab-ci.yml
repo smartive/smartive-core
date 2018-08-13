@@ -40,7 +40,7 @@ create release:
 publish database:
   stage: deploy
   script:
-    - dotnet pack -o ../nuget -c Release /p:PackageVersion=$CI_COMMIT_TAG Smartive.Core.Database
+    - dotnet pack -o ../nuget -c Release /p:PackageVersion=$(echo $CI_COMMIT_TAG | cut -c 2-) Smartive.Core.Database
     - dotnet nuget push ./nuget/*.nupkg --api-key $NUGET_KEY
   only:
     - tags
