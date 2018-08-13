@@ -48,9 +48,7 @@ namespace Smartive.Core.Database.Repositories
 
             if (type.GetCustomAttribute<AutoUpdatable>() == null)
             {
-                properties = properties.Where(property => property.CanRead &&
-                                                          property.CanWrite &&
-                                                          property.GetCustomAttribute<AutoUpdatable>() != null);
+                properties = properties.Where(property => property.GetCustomAttribute<AutoUpdatable>() != null);
             }
 
             foreach (var property in properties)
