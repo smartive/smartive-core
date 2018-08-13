@@ -29,6 +29,7 @@ build database:
 
 create release:
   stage: deploy
+  image: node:10-alpine
   before_script:
     - npm ci
   script:
