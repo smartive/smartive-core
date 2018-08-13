@@ -1,8 +1,28 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Database", "Smartive.Core.Database\Smartive.Core.Database.csproj", "{806D6DDD-5297-41FD-A7D7-FCFBAA9F1125}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Database.Test", "Smartive.Core.Database.Test\Smartive.Core.Database.Test.csproj", "{3701DDAD-348E-4986-9E71-301A95C6FCF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core", "Smartive.Core\Smartive.Core.csproj", "{12E88DE0-AF2B-432F-9B69-AD108DC08AF7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{806D6DDD-5297-41FD-A7D7-FCFBAA9F1125}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{806D6DDD-5297-41FD-A7D7-FCFBAA9F1125}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{806D6DDD-5297-41FD-A7D7-FCFBAA9F1125}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{806D6DDD-5297-41FD-A7D7-FCFBAA9F1125}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3701DDAD-348E-4986-9E71-301A95C6FCF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3701DDAD-348E-4986-9E71-301A95C6FCF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3701DDAD-348E-4986-9E71-301A95C6FCF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3701DDAD-348E-4986-9E71-301A95C6FCF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12E88DE0-AF2B-432F-9B69-AD108DC08AF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12E88DE0-AF2B-432F-9B69-AD108DC08AF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12E88DE0-AF2B-432F-9B69-AD108DC08AF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12E88DE0-AF2B-432F-9B69-AD108DC08AF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
