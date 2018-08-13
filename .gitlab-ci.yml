@@ -41,6 +41,6 @@ publish database:
   stage: deploy
   script:
     - dotnet pack -o ../nuget -c Release /p:PackageVersion=$(echo $CI_COMMIT_TAG | cut -c 2-) Smartive.Core.Database
-    - dotnet nuget push ./nuget/*.nupkg --api-key $NUGET_KEY --source https://www.nuget.org/api/v2/package
+    - dotnet nuget push ./nuget/Smartive.Core.Database.$(echo $CI_COMMIT_TAG | cut -c 2-).nupkg --api-key $NUGET_KEY --source https://www.nuget.org/api/v2/package
   only:
     - tags
