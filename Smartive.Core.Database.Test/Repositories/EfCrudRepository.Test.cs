@@ -41,5 +41,28 @@ namespace Smartive.Core.Database.Test.Repositories
 
             model.Id.Should().NotBe(0);
         }
+
+        [Fact]
+        public async Task TestUpdateModel()
+        {
+            var context = new TestInMemoryContext();
+            var repo = new EfCrudRepositoryInstance(context.Models, context);
+
+            var model = new TestModel
+            {
+                Name = "Hans Muster",
+                Age = 40
+            };
+
+            var entity = await repo.Create(model);
+
+            entity.Name = "Hans Meier";
+
+            await repo.Update(entity);
+
+            entity = await repo.GetById(entity.Id);
+
+            entity.Name.Should().Be("Hans Meier");
+        }
     }
 }
