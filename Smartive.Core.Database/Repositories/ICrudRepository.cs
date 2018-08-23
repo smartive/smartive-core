@@ -53,7 +53,7 @@ namespace Smartive.Core.Database.Repositories
         /// </summary>
         /// <param name="id">The key to delete.</param>
         /// <returns>A task that resolves when the element is deleted.</returns>
-        Task DeleteById(TKey id);
+        Task<TEntity> DeleteById(TKey id);
     }
 
     /// <inheritdoc />

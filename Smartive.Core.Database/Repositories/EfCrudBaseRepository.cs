@@ -69,16 +69,17 @@ namespace Smartive.Core.Database.Repositories
         public abstract Task<TEntity> Update(TEntity entity);
 
         /// <inheritdoc />
-        public async Task DeleteById(TKey id)
+        public async Task<TEntity> DeleteById(TKey id)
         {
             var entity = await GetById(id);
             if (entity == null)
             {
-                return;
+                return null;
             }
 
             Entities.Remove(entity);
             await Context.SaveChangesAsync();
+            return entity;
         }
     }
 
