@@ -39,26 +39,26 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public IQueryable<TEntity> AsQueryable()
+        public virtual IQueryable<TEntity> AsQueryable()
         {
             return Entities.AsQueryable();
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<TEntity>> GetAll()
+        public virtual async Task<IEnumerable<TEntity>> GetAll()
         {
             var entities = await Entities.ToListAsync();
             return entities;
         }
 
         /// <inheritdoc />
-        public Task<TEntity> GetById(TKey id)
+        public virtual Task<TEntity> GetById(TKey id)
         {
             return Entities.SingleOrDefaultAsync(e => e.Id.Equals(id));
         }
 
         /// <inheritdoc />
-        public async Task<TEntity> Create(TEntity entity)
+        public virtual async Task<TEntity> Create(TEntity entity)
         {
             await Entities.AddAsync(entity);
             await Context.SaveChangesAsync();
@@ -69,7 +69,7 @@ namespace Smartive.Core.Database.Repositories
         public abstract Task<TEntity> Update(TEntity entity);
 
         /// <inheritdoc />
-        public async Task<TEntity> DeleteById(TKey id)
+        public virtual async Task<TEntity> DeleteById(TKey id)
         {
             var entity = await GetById(id);
             if (entity == null)
