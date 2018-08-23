@@ -8,11 +8,12 @@ namespace Smartive.Core.Database.Repositories
 #pragma warning disable SA1402
 
     /// <inheritdoc />
-    public abstract class EfCrudRepository<TKey, TEntity> : EfCrudBaseRepository<TKey, TEntity>
+    public abstract class EfCrudRepository<TKey, TEntity, TContext> : EfCrudBaseRepository<TKey, TEntity, TContext>
         where TEntity : Base<TKey>
+        where TContext : DbContext
     {
         /// <inheritdoc />
-        protected EfCrudRepository(DbSet<TEntity> entities, DbContext context)
+        protected EfCrudRepository(DbSet<TEntity> entities, TContext context)
             : base(entities, context)
         {
         }
@@ -47,7 +48,19 @@ namespace Smartive.Core.Database.Repositories
     }
 
     /// <inheritdoc />
-    public abstract class EfCrudRepository<TEntity> : EfCrudRepository<int, TEntity>
+    public abstract class EfCrudRepository<TEntity, TContext> : EfCrudRepository<int, TEntity, TContext>
+        where TEntity : Base
+        where TContext : DbContext
+    {
+        /// <inheritdoc />
+        protected EfCrudRepository(DbSet<TEntity> entities, TContext context)
+            : base(entities, context)
+        {
+        }
+    }
+
+    /// <inheritdoc />
+    public abstract class EfCrudRepository<TEntity> : EfCrudRepository<TEntity, DbContext>
         where TEntity : Base
     {
         /// <inheritdoc />

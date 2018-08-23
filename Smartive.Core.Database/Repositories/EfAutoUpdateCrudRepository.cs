@@ -15,11 +15,13 @@ namespace Smartive.Core.Database.Repositories
     /// </summary>
     /// <typeparam name="TKey">Type of the id property.</typeparam>
     /// <typeparam name="TEntity">Type of the entity.</typeparam>
-    public class EfAutoUpdateCrudRepository<TKey, TEntity> : EfCrudBaseRepository<TKey, TEntity>
+    /// /// <typeparam name="TContext">Type of the database context.</typeparam>
+    public class EfAutoUpdateCrudRepository<TKey, TEntity, TContext> : EfCrudBaseRepository<TKey, TEntity, TContext>
         where TEntity : Base<TKey>
+        where TContext : DbContext
     {
         /// <inheritdoc />
-        public EfAutoUpdateCrudRepository(DbSet<TEntity> entities, DbContext context)
+        public EfAutoUpdateCrudRepository(DbSet<TEntity> entities, TContext context)
             : base(entities, context)
         {
         }
@@ -64,7 +66,19 @@ namespace Smartive.Core.Database.Repositories
     }
 
     /// <inheritdoc />
-    public class EfAutoUpdateCrudRepository<TEntity> : EfAutoUpdateCrudRepository<int, TEntity>
+    public class EfAutoUpdateCrudRepository<TEntity, TContext> : EfAutoUpdateCrudRepository<int, TEntity, TContext>
+        where TEntity : Base
+        where TContext : DbContext
+    {
+        /// <inheritdoc />
+        public EfAutoUpdateCrudRepository(DbSet<TEntity> entities, TContext context)
+            : base(entities, context)
+        {
+        }
+    }
+
+    /// <inheritdoc />
+    public class EfAutoUpdateCrudRepository<TEntity> : EfAutoUpdateCrudRepository<TEntity, DbContext>
         where TEntity : Base
     {
         /// <inheritdoc />

@@ -14,13 +14,15 @@ namespace Smartive.Core.Database.Repositories
     /// </summary>
     /// <typeparam name="TKey">Type of the key.</typeparam>
     /// <typeparam name="TEntity">Type of the entity.</typeparam>
-    public abstract class EfCrudBaseRepository<TKey, TEntity> : ICrudRepository<TKey, TEntity>
+    /// <typeparam name="TContext">Type of the database context.</typeparam>
+    public abstract class EfCrudBaseRepository<TKey, TEntity, TContext> : ICrudRepository<TKey, TEntity>
         where TEntity : Base<TKey>
+        where TContext : DbContext
     {
         /// <summary>
         /// The given database context for this repository.
         /// </summary>
-        protected readonly DbContext Context;
+        protected readonly TContext Context;
 
         /// <summary>
         /// Entityset of this repository.
@@ -32,7 +34,7 @@ namespace Smartive.Core.Database.Repositories
         /// </summary>
         /// <param name="entities">List of entities.</param>
         /// <param name="context">Database context.</param>
-        protected EfCrudBaseRepository(DbSet<TEntity> entities, DbContext context)
+        protected EfCrudBaseRepository(DbSet<TEntity> entities, TContext context)
         {
             Entities = entities;
             Context = context;
@@ -84,7 +86,24 @@ namespace Smartive.Core.Database.Repositories
     }
 
     /// <inheritdoc />
-    public abstract class EfCrudBaseRepository<TEntity> : EfCrudBaseRepository<int, TEntity>
+    public abstract class EfCrudBaseRepository<TEntity, TContext> : EfCrudBaseRepository<int, TEntity, TContext>
+        where TEntity : Base
+        where TContext : DbContext
+    {
+        /// <inheritdoc />
+        /// <summary>
+        /// Create an instance of the repository. Provides basic functionality.
+        /// </summary>
+        /// <param name="entities">List of entities.</param>
+        /// <param name="context">Database context.</param>
+        protected EfCrudBaseRepository(DbSet<TEntity> entities, TContext context)
+            : base(entities, context)
+        {
+        }
+    }
+
+    /// <inheritdoc />
+    public abstract class EfCrudBaseRepository<TEntity> : EfCrudBaseRepository<TEntity, DbContext>
         where TEntity : Base
     {
         /// <inheritdoc />
