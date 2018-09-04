@@ -48,7 +48,7 @@ namespace Smartive.Core.Database.Repositories
     }
 
     /// <inheritdoc />
-    public abstract class EfCrudRepository<TEntity, TContext> : EfCrudRepository<int, TEntity, TContext>
+    public abstract class EfCrudRepository<TEntity, TContext> : EfCrudRepository<int, TEntity, TContext>, ICrudRepository<TEntity>
         where TEntity : Base
         where TContext : DbContext
     {

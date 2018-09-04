@@ -66,7 +66,7 @@ namespace Smartive.Core.Database.Repositories
     }
 
     /// <inheritdoc />
-    public class EfAutoUpdateCrudRepository<TEntity, TContext> : EfAutoUpdateCrudRepository<int, TEntity, TContext>
+    public class EfAutoUpdateCrudRepository<TEntity, TContext> : EfAutoUpdateCrudRepository<int, TEntity, TContext>, ICrudRepository<TEntity>
         where TEntity : Base
         where TContext : DbContext
     {
