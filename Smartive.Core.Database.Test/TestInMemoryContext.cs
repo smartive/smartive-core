@@ -6,6 +6,7 @@ namespace Smartive.Core.Database.Test
     public class TestInMemoryContext : DbContext
     {
         public DbSet<TestModel> Models { get; set; }
+        public DbSet<TestModelKey> KeyModels { get; set; }
         public DbSet<AutoUpdateModel> AutoUpdateModels { get; set; }
         public DbSet<AutoPropertyUpdateModel> AutoPropertyUpdateModels { get; set; }
 

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FluentAssertions;
 using Smartive.Core.Database.Repositories;
 using Smartive.Core.Database.Test.Models;
@@ -7,20 +6,13 @@ using Xunit;
 
 namespace Smartive.Core.Database.Test.Repositories
 {
-    public class EfAutoUpdateCrudRepositorySqLiteTest
+    public class EfAutoUpdateCrudRepositoryTest
     {
-        private readonly TestSqLiteContext _context;
-
-        public EfAutoUpdateCrudRepositorySqLiteTest()
-        {
-            _context = new TestSqLiteContext(Guid.NewGuid().ToString());
-            _context.CreateTables();
-        }
-
         [Fact]
         public async Task TestInsertModel()
         {
-            var repo = new EfAutoUpdateCrudRepository<AutoUpdateModel>(_context.AutoUpdateModels, _context);
+            var context = new TestInMemoryContext();
+            var repo = new EfAutoUpdateCrudRepository<AutoUpdateModel>(context.AutoUpdateModels, context);
 
             var model = new AutoUpdateModel
             {
@@ -39,7 +31,8 @@ namespace Smartive.Core.Database.Test.Repositories
         [Fact]
         public async Task TestAutoUpdateModel()
         {
-            var repo = new EfAutoUpdateCrudRepository<AutoUpdateModel>(_context.AutoUpdateModels, _context);
+            var context = new TestInMemoryContext();
+            var repo = new EfAutoUpdateCrudRepository<AutoUpdateModel>(context.AutoUpdateModels, context);
 
             var model = new AutoUpdateModel
             {
@@ -63,8 +56,9 @@ namespace Smartive.Core.Database.Test.Repositories
         [Fact]
         public async Task TestAutoPropertyUpdateModel()
         {
-            var repo = new EfAutoUpdateCrudRepository<AutoPropertyUpdateModel>(_context.AutoPropertyUpdateModels,
-                _context);
+            var context = new TestInMemoryContext();
+            var repo = new EfAutoUpdateCrudRepository<AutoPropertyUpdateModel>(context.AutoPropertyUpdateModels,
+                context);
 
             var model = new AutoPropertyUpdateModel
             {

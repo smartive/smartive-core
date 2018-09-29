@@ -8,7 +8,7 @@ stages:
 test database:
   stage: test
   script:
-    - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov Smartive.Core.Database.Test
+    - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CopyLocalLockFileAssemblies=true Smartive.Core.Database.Test
   coverage: /Smartive.Core.Database\s*\|\s*([\d\.]+)/
   except:
     - tags
