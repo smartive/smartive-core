@@ -25,7 +25,7 @@ namespace Smartive.Core.Database.Repositories
         protected readonly TContext Context;
 
         /// <summary>
-        /// Entityset of this repository.
+        /// Entity-set of this repository.
         /// </summary>
         protected readonly DbSet<TEntity> Entities;
 
@@ -85,7 +85,7 @@ namespace Smartive.Core.Database.Repositories
         }
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="EfCrudBaseRepository{TKey,TEntity,TContext}" />
     public abstract class EfCrudBaseRepository<TEntity, TContext> : EfCrudBaseRepository<int, TEntity, TContext>, ICrudRepository<TEntity>
         where TEntity : Base
         where TContext : DbContext

@@ -10,12 +10,13 @@ namespace Smartive.Core.Database.Repositories
 {
 #pragma warning disable SA1402
 
+    /// <inheritdoc />
     /// <summary>
-    /// Repository that uses the <see cref="AutoUpdatable"/> attribute to update entites.
+    /// Repository that uses the <see cref="T:Smartive.Core.Database.Attributes.AutoUpdatable" /> attribute to update entities.
     /// </summary>
     /// <typeparam name="TKey">Type of the id property.</typeparam>
     /// <typeparam name="TEntity">Type of the entity.</typeparam>
-    /// /// <typeparam name="TContext">Type of the database context.</typeparam>
+    /// <typeparam name="TContext">Type of the database context.</typeparam>
     public class EfAutoUpdateCrudRepository<TKey, TEntity, TContext> : EfCrudBaseRepository<TKey, TEntity, TContext>
         where TEntity : Base<TKey>
         where TContext : DbContext
@@ -65,7 +66,7 @@ namespace Smartive.Core.Database.Repositories
         }
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="EfAutoUpdateCrudRepository{TKey,TEntity,TContext}" />
     public class EfAutoUpdateCrudRepository<TEntity, TContext> : EfAutoUpdateCrudRepository<int, TEntity, TContext>, ICrudRepository<TEntity>
         where TEntity : Base
         where TContext : DbContext

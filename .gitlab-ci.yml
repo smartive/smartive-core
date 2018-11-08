@@ -2,37 +2,46 @@ image: microsoft/dotnet:2.1-sdk
 
 stages:
   - test
-  - build
   - deploy
 
-test database:
+# Templates
+
+.test:
   stage: test
   script:
-    - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CopyLocalLockFileAssemblies=true Smartive.Core.Database.Test
-  coverage: /Smartive.Core.Database\s*\|\s*([\d\.]+)/
+    - dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CopyLocalLockFileAssemblies=true $PACKAGE.Test
+  coverage: /$PACKAGE\s*\|\s*([\d\.]+)/
   except:
     - tags
 
-style cop database:
-  stage: test
+.nuget:
+  stage: deploy
   script:
-    - dotnet build Smartive.Core.Database
-  except:
+    - dotnet pack -o ../nuget -c Release /p:PackageVersion=$(echo $CI_COMMIT_TAG | cut -c 2-) $PACKAGE
+    - dotnet nuget push ./nuget/$PACKAGE.$(echo $CI_COMMIT_TAG | cut -c 2-).nupkg --api-key $NUGET_KEY --source https://www.nuget.org/api/v2/package
+  only:
     - tags
 
-build composition:
-  stage: build
+# Testing
+
+lint:
+  stage: test
   script:
     - dotnet build Smartive.Core -c Release
   except:
     - tags
 
-build database:
-  stage: build
-  script:
-    - dotnet build Smartive.Core.Database -c Release
-  except:
-    - tags
+test database:
+  extends: .test
+  variables:
+    PACKAGE: Smartive.Core.Database
+
+test debug:
+  extends: .test
+  variables:
+    PACKAGE: Smartive.Core.Debug
+
+# Release
 
 create release:
   stage: deploy
@@ -44,18 +53,19 @@ create release:
   only:
     - master
 
+# Deploy to nuget
+
 publish composition:
-  stage: deploy
-  script:
-    - dotnet pack -o ../nuget -c Release /p:PackageVersion=$(echo $CI_COMMIT_TAG | cut -c 2-) Smartive.Core
-    - dotnet nuget push ./nuget/Smartive.Core.$(echo $CI_COMMIT_TAG | cut -c 2-).nupkg --api-key $NUGET_KEY --source https://www.nuget.org/api/v2/package
-  only:
-    - tags
+  extends: .nuget
+  variables:
+    PACKAGE: Smartive.Core
 
 publish database:
-  stage: deploy
-  script:
-    - dotnet pack -o ../nuget -c Release /p:PackageVersion=$(echo $CI_COMMIT_TAG | cut -c 2-) Smartive.Core.Database
-    - dotnet nuget push ./nuget/Smartive.Core.Database.$(echo $CI_COMMIT_TAG | cut -c 2-).nupkg --api-key $NUGET_KEY --source https://www.nuget.org/api/v2/package
-  only:
-    - tags
+  extends: .nuget
+  variables:
+    PACKAGE: Smartive.Core.Database
+
+publish debug:
+  extends: .nuget
+  variables:
+    PACKAGE: Smartive.Core.Debug
