@@ -6,6 +6,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Database.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core", "Smartive.Core\Smartive.Core.csproj", "{12E88DE0-AF2B-432F-9B69-AD108DC08AF7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Debug", "Smartive.Core.Debug\Smartive.Core.Debug.csproj", "{139C7146-9BB7-4527-A253-DDC3432E2185}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "etc", "etc", "{E5A71516-A7FC-40AE-8FFA-AFB2C6218E8F}"
+ProjectSection(SolutionItems) = preProject
+	package.json = package.json
+	.gitlab-ci.yml = .gitlab-ci.yml
+	.gitignore = .gitignore
+EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Debug.Test", "Smartive.Core.Debug.Test\Smartive.Core.Debug.Test.csproj", "{83791288-13D2-46CE-8F95-E9875A166AF1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +35,13 @@ Global
 		{12E88DE0-AF2B-432F-9B69-AD108DC08AF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12E88DE0-AF2B-432F-9B69-AD108DC08AF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{12E88DE0-AF2B-432F-9B69-AD108DC08AF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{139C7146-9BB7-4527-A253-DDC3432E2185}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{139C7146-9BB7-4527-A253-DDC3432E2185}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{139C7146-9BB7-4527-A253-DDC3432E2185}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{139C7146-9BB7-4527-A253-DDC3432E2185}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83791288-13D2-46CE-8F95-E9875A166AF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83791288-13D2-46CE-8F95-E9875A166AF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83791288-13D2-46CE-8F95-E9875A166AF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83791288-13D2-46CE-8F95-E9875A166AF1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

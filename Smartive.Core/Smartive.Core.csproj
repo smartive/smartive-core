@@ -5,6 +5,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Smartive.Core.Database\Smartive.Core.Database.csproj"/>
+        <ProjectReference Include="..\Smartive.Core.Database\Smartive.Core.Database.csproj" />
+        <ProjectReference Include="..\Smartive.Core.Debug\Smartive.Core.Debug.csproj" />
     </ItemGroup>
 </Project>

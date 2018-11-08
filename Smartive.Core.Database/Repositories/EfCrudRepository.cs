@@ -47,7 +47,7 @@ namespace Smartive.Core.Database.Repositories
         protected abstract void UpdateEntity(ref TEntity dbEntity, TEntity entity);
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="EfCrudRepository{TKey,TEntity,TContext}" />
     public abstract class EfCrudRepository<TEntity, TContext> : EfCrudRepository<int, TEntity, TContext>, ICrudRepository<TEntity>
         where TEntity : Base
         where TContext : DbContext
