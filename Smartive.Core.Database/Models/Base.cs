@@ -19,7 +19,7 @@ namespace Smartive.Core.Database.Models
 
     /// <inheritdoc />
     /// <summary>
-    /// Default basic model class which an `int` Id (Tkey)
+    /// Default basic model class which an `int` Id (TKey)
     /// </summary>
     public abstract class Base : Base<int>
     {

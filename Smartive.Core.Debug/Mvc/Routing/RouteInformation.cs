@@ -16,6 +16,15 @@ namespace Smartive.Core.Debug.Mvc.Routing
         private readonly ActionDescriptor _descriptor;
 
         /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="descriptor">The action descriptor that should be used.</param>
+        public RouteInformation(ActionDescriptor descriptor)
+        {
+            _descriptor = descriptor;
+        }
+
+        /// <summary>
         /// Returns the HTTP-METHOD for the given route,
         /// "All" if the <see cref="RouteAttribute"/> is used or "Unknown" if no
         /// actual method is found.
@@ -121,15 +130,6 @@ namespace Smartive.Core.Debug.Mvc.Routing
 
                 return sb.ToString();
             }
-        }
-
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="descriptor">The action descriptor that should be used.</param>
-        public RouteInformation(ActionDescriptor descriptor)
-        {
-            _descriptor = descriptor;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Smartive.Core.Database.Repositories
         where TEntity : Base<TKey>
     {
         /// <summary>
-        /// Returns the whole list of entites as a queryable.
+        /// Returns the whole list of entities as a queryable.
         /// </summary>
         /// <returns>A queryable list of entities.</returns>
         IQueryable<TEntity> AsQueryable();
@@ -38,15 +38,52 @@ namespace Smartive.Core.Database.Repositories
         /// Create the given entity in the context.
         /// </summary>
         /// <param name="entity">Entity to save.</param>
-        /// <returns>The updated entity with the set Id.</returns>
+        /// <returns>The created entity with the set Id.</returns>
         Task<TEntity> Create(TEntity entity);
 
         /// <summary>
-        /// Update the given entity.
+        /// Create the given entities in the context.
+        /// </summary>
+        /// <param name="entities">Entities to save.</param>
+        /// <returns>The created entities with the set Ids.</returns>
+        Task<IEnumerable<TEntity>> Create(IEnumerable<TEntity> entities);
+
+        /// <summary>
+        /// Update the given entity. This updates all properties on the entity.
         /// </summary>
         /// <param name="entity">The entity to update.</param>
         /// <returns>The updated entity.</returns>
         Task<TEntity> Update(TEntity entity);
+
+        /// <summary>
+        /// Update the given entities. This updates all properties on the entities.
+        /// </summary>
+        /// <param name="entities">The entities to update.</param>
+        /// <returns>The updated entities.</returns>
+        Task<IEnumerable<TEntity>> Update(IEnumerable<TEntity> entities);
+
+        /// <summary>
+        /// Saves the given entity. Save means, `if Id == default then create else update`.
+        /// Navigation properties are not saved.
+        /// </summary>
+        /// <param name="entity">The entity to save.</param>
+        /// <returns>The saved entity.</returns>
+        Task<TEntity> Save(TEntity entity);
+
+        /// <summary>
+        /// Saves the given entities. Save means, `if Id == default then create else update`.
+        /// Navigation properties are not saved.
+        /// </summary>
+        /// <param name="entities">The entities to save.</param>
+        /// <returns>The saved entities.</returns>
+        Task<IEnumerable<TEntity>> Save(IEnumerable<TEntity> entities);
+
+        /// <summary>
+        /// Deletes a given entity.
+        /// </summary>
+        /// <param name="entity">The entity to delete.</param>
+        /// <returns>The deleted entity.</returns>
+        Task<TEntity> Delete(TEntity entity);
 
         /// <summary>
         /// Delete a given entity by it's key.

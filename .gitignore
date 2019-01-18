@@ -6,7 +6,10 @@
 
 # Ci things
 node_modules/
+tools/
 nuget/
+artifacts/
+coverage/
 
 # Build results
 [Dd]ebug/

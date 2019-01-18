@@ -4,17 +4,21 @@
         <LangVersion>7.2</LangVersion>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.4" />
-        <PackageReference Condition="'$(Configuration)' != 'Release'" PrivateAssets="All" Include="StyleCop.Analyzers" Version="1.0.2" />
     </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference PrivateAssets="All" Include="StyleCop.Analyzers" Version="1.0.2" />
+      <AdditionalFiles Include="../stylecop.json" />
+    </ItemGroup>
+
     <PropertyGroup>
-        <NoWarn>SA1642,SA1633,SA1101,SA1648,SA1401</NoWarn>
+        <CodeAnalysisRuleSet>../project.ruleset</CodeAnalysisRuleSet>
     </PropertyGroup>
+
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
-    <ItemGroup>
-        <AdditionalFiles Condition="'$(Configuration)' != 'Release'" Include="stylecop.json" />
-    </ItemGroup>
 </Project>
