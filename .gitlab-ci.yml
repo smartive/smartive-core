@@ -35,5 +35,8 @@ publish:
   extends: .base
   script:
     - ./build.sh --target=Publish
+  artifacts:
+    paths:
+      - artifacts/
   only:
     - tags
