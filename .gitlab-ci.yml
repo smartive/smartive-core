@@ -18,6 +18,8 @@ test:
   artifacts:
     paths:
       - coverage/
+  except:
+    - tags
 
 # Release
 
