@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Smartive.Core.Database.Models;
 
 namespace Smartive.Core.Database.Repositories
@@ -40,6 +41,9 @@ namespace Smartive.Core.Database.Repositories
         protected DbSet<TEntity> Entities => Context.Set<TEntity>();
 
         /// <inheritdoc />
+        public Task<IDbContextTransaction> BeginTransaction() => Context.Database.BeginTransactionAsync();
+
+        /// <inheritdoc />
         public virtual IQueryable<TEntity> AsQueryable()
         {
             return Entities.AsQueryable();
@@ -60,6 +64,11 @@ namespace Smartive.Core.Database.Repositories
         /// <inheritdoc />
         public virtual async Task<TEntity> Create(TEntity entity)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
             await Entities.AddAsync(entity);
             await Context.SaveChangesAsync();
             return entity;
@@ -68,6 +77,11 @@ namespace Smartive.Core.Database.Repositories
         /// <inheritdoc />
         public virtual async Task<IEnumerable<TEntity>> Create(IEnumerable<TEntity> entities)
         {
+            if (entities == null)
+            {
+                throw new ArgumentNullException(nameof(entities));
+            }
+
             var enumerable = entities.ToList();
             if (enumerable.Count <= 0)
             {
@@ -80,6 +94,11 @@ namespace Smartive.Core.Database.Repositories
         /// <inheritdoc />
         public virtual async Task<TEntity> Update(TEntity entity)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
             if (IsTracked(entity, out var tracked))
             {
                 Context.Entry(tracked).CurrentValues.SetValues(entity);
@@ -96,6 +115,11 @@ namespace Smartive.Core.Database.Repositories
         /// <inheritdoc />
         public virtual async Task<IEnumerable<TEntity>> Update(IEnumerable<TEntity> entities)
         {
+            if (entities == null)
+            {
+                throw new ArgumentNullException(nameof(entities));
+            }
+
             var enumerable = entities.ToList();
             if (enumerable.Count <= 0)
             {
@@ -108,7 +132,12 @@ namespace Smartive.Core.Database.Repositories
         /// <inheritdoc />
         public virtual Task<TEntity> Save(TEntity entity)
         {
-            return entity.Id.Equals(default)
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            return entity.Id.Equals(default(TKey))
                 ? Create(entity)
                 : Update(entity);
         }
@@ -116,6 +145,11 @@ namespace Smartive.Core.Database.Repositories
         /// <inheritdoc />
         public virtual async Task<IEnumerable<TEntity>> Save(IEnumerable<TEntity> entities)
         {
+            if (entities == null)
+            {
+                throw new ArgumentNullException(nameof(entities));
+            }
+
             using (var transaction = await Context.Database.BeginTransactionAsync())
             {
                 var result = await Task.WhenAll(entities.Select(Save));
@@ -125,8 +159,54 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
+        public Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+            IQueryable<TEntity> source,
+            IEnumerable<TEntity> newEntities,
+            bool useTransaction = false)
+        {
+            var newList = newEntities.ToList();
+
+            async Task<SynchronizationResult<TKey, TEntity>> Synchronization()
+            {
+                var entities = await source.ToListAsync();
+
+                var addEntities = newList
+                    .Where(entity => entity.Id.Equals(default(TKey)))
+                    .ToList();
+                var existingEntities = newList
+                    .Where(entity => !entity.Id.Equals(default(TKey)))
+                    .ToList();
+                var oldEntities = entities
+                    .Where(entity => !newList.Any(newEntity => entity.Id.Equals(newEntity.Id)))
+                    .ToList();
+
+                return new SynchronizationResult<TKey, TEntity>
+                {
+                    Added = useTransaction
+                        ? (await Task.WhenAll(addEntities.Select(Create))).ToList()
+                        : await Create(addEntities),
+                    Updated = useTransaction
+                        ? (await Task.WhenAll(existingEntities.Select(Update))).ToList()
+                        : await Update(existingEntities),
+                    Removed = useTransaction
+                        ? (await Task.WhenAll(oldEntities.Select(Delete))).ToList()
+                        : await Delete(oldEntities)
+                };
+            }
+
+            return useTransaction
+                ? ExecuteTransactional(Synchronization)
+                : Synchronization();
+        }
+
+        /// <inheritdoc />
         public async Task<TEntity> Delete(TEntity entity)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
             if (!IsTracked(entity, out var trackedEntity))
             {
                 return await DeleteById(entity.Id);
@@ -140,6 +220,11 @@ namespace Smartive.Core.Database.Repositories
         /// <inheritdoc />
         public async Task<IEnumerable<TEntity>> Delete(IEnumerable<TEntity> entities)
         {
+            if (entities == null)
+            {
+                throw new ArgumentNullException(nameof(entities));
+            }
+
             var enumerable = entities.ToList();
             if (enumerable.Count <= 0)
             {
@@ -166,6 +251,11 @@ namespace Smartive.Core.Database.Repositories
         /// <inheritdoc />
         public async Task<IEnumerable<TEntity>> DeleteById(IEnumerable<TKey> ids)
         {
+            if (ids == null)
+            {
+                throw new ArgumentNullException(nameof(ids));
+            }
+
             var enumerable = ids.ToList();
             if (enumerable.Count <= 0)
             {

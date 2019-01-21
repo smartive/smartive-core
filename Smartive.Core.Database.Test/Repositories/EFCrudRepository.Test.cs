@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -540,6 +542,213 @@ namespace Smartive.Core.Database.Test.Repositories
 
             var result = await _authors.GetAll();
             result.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public async Task Test_Use_Transaction_For_Operations()
+        {
+            await InsertDemoData();
+
+            using (var t = await _authors.BeginTransaction())
+            {
+                await _authors.Create(new Author { Name = "A4" });
+                await _authors.Update(new Author { Id = 1, Name = "Transaction" });
+                t.Commit();
+            }
+
+            var result = (await _authors.GetAll()).ToList();
+            result.Any(a => a.Id == 4 && a.Name == "A4").Should().BeTrue();
+            result.Any(a => a.Id == 1 && a.Name == "Transaction").Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task Test_Synchronize_Collection_of_Authors()
+        {
+            await InsertDemoData();
+
+            var syncResult = await _authors.SynchronizeCollection(
+                _authors.AsQueryable(),
+                new[]
+                {
+                    new Author { Id = 1, Name = "Updated" },
+                    new Author { Name = "NewOne" }
+                });
+
+            var a = syncResult.Added.ToList();
+            var u = syncResult.Updated.ToList();
+            var r = syncResult.Removed.ToList();
+
+            a.Count.Should().Be(1);
+            u.Count.Should().Be(1);
+            r.Count.Should().Be(2);
+
+            var result = (await _authors.GetAll()).ToList();
+
+            result.Count.Should().Be(2);
+            result.Any(o => o.Name == "Updated" && o.Id == 1).Should().BeTrue();
+            result.Any(o => o.Name == "NewOne" && o.Id == 4).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task Test_Synchronize_NavigationProperty_of_Author()
+        {
+            await InsertDemoData();
+
+            var author = await _authors
+                .AsQueryable()
+                .Include(a => a.Books)
+                .SingleAsync(a => a.Id == 2);
+
+            author.Name = "Updated";
+            author.Books[0].Name = "Updated Book";
+
+            await _authors.Save(author);
+            var result = await _books.SynchronizeCollection(
+                _books.AsQueryable().Where(b => b.AuthorId == 2),
+                author.Books);
+
+            result.Added.Count().Should().Be(0);
+            result.Updated.Count().Should().Be(2);
+            result.Removed.Count().Should().Be(0);
+
+            author = await _authors
+                .AsQueryable()
+                .Include(a => a.Books)
+                .SingleAsync(a => a.Id == 2);
+
+            author.Name.Should().Be("Updated");
+            author.Books[0].Name.Should().Be("Updated Book");
+            author.Books[1].Name.Should().Be("B3");
+        }
+
+        [Fact]
+        public async Task Test_Synchronize_Transactional_Author()
+        {
+            await InsertDemoData();
+
+            var syncResult = await _authors.SynchronizeCollection(
+                _authors.AsQueryable(),
+                new[]
+                {
+                    new Author { Id = 1, Name = "Updated" },
+                    new Author { Name = "NewOne" }
+                },
+                true);
+
+            var a = syncResult.Added.ToList();
+            var u = syncResult.Updated.ToList();
+            var r = syncResult.Removed.ToList();
+
+            a.Count.Should().Be(1);
+            u.Count.Should().Be(1);
+            r.Count.Should().Be(2);
+
+            var result = (await _authors.GetAll()).ToList();
+
+            result.Count.Should().Be(2);
+            result.Any(o => o.Name == "Updated" && o.Id == 1).Should().BeTrue();
+            result.Any(o => o.Name == "NewOne" && o.Id == 4).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task Test_Synchronize_Transactional_NavigationProperty_of_Author()
+        {
+            await InsertDemoData();
+
+            var author = await _authors
+                .AsQueryable()
+                .Include(a => a.Books)
+                .SingleAsync(a => a.Id == 2);
+
+            author.Name = "Updated";
+            author.Books[0].Name = "Updated Book";
+
+            await _authors.Save(author);
+            var result = await _books.SynchronizeCollection(
+                _books.AsQueryable().Where(b => b.AuthorId == 2),
+                author.Books,
+                true);
+
+            result.Added.Count().Should().Be(0);
+            result.Updated.Count().Should().Be(2);
+            result.Removed.Count().Should().Be(0);
+
+            author = await _authors
+                .AsQueryable()
+                .Include(a => a.Books)
+                .SingleAsync(a => a.Id == 2);
+
+            author.Name.Should().Be("Updated");
+            author.Books[0].Name.Should().Be("Updated Book");
+            author.Books[1].Name.Should().Be("B3");
+        }
+
+        [Fact]
+        public async Task Test_Throw_On_Duplicate_Id()
+        {
+            await InsertDemoData();
+
+            Func<Task> action = async () => await _authors.Create(new Author { Id = 1, Name = "Name" });
+
+            action.Should().Throw<InvalidOperationException>();
+        }
+
+        [Fact]
+        public async Task Test_Return_Null_On_Delete_When_Not_Found()
+        {
+            await InsertDemoData();
+
+            var result = await _authors.DeleteById(15);
+            result.Should().BeNull();
+        }
+
+        [Fact]
+        public void Test_Throw_On_Null_Create()
+        {
+            Func<Task> action = async () => await _authors.Create((Author)null);
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void Test_Throw_On_Null_Create_Multiple()
+        {
+            Func<Task> action = async () => await _authors.Create((IEnumerable<Author>)null);
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void Test_Throw_On_Null_Update()
+        {
+            Func<Task> action = async () => await _authors.Update((Author)null);
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void Test_Throw_On_Null_Update_Multiple()
+        {
+            Func<Task> action = async () => await _authors.Update((IEnumerable<Author>)null);
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void Test_Throw_On_Null_Delete()
+        {
+            Func<Task> action = async () => await _authors.Delete((Author)null);
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void Test_Throw_On_Null_Delete_Multiple()
+        {
+            Func<Task> action = async () => await _authors.Delete((IEnumerable<Author>)null);
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void Test_Throw_On_Null_DeleteById_Multiple()
+        {
+            Func<Task> action = async () => await _authors.DeleteById(null);
+            action.Should().Throw<ArgumentNullException>();
         }
 
         private async Task InsertDemoData()

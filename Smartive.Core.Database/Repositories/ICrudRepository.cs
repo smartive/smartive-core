@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Storage;
 using Smartive.Core.Database.Models;
 
 namespace Smartive.Core.Database.Repositories
@@ -12,9 +13,23 @@ namespace Smartive.Core.Database.Repositories
     /// </summary>
     /// <typeparam name="TKey">Type of the key (id).</typeparam>
     /// <typeparam name="TEntity">Type of the entity.</typeparam>
-    public interface ICrudRepository<in TKey, TEntity>
+    public interface ICrudRepository<TKey, TEntity>
         where TEntity : Base<TKey>
     {
+        /// <summary>
+        /// Starts a transaction on the given db context.
+        /// Be advised, that a transaction can be "used" by other repositories, but they
+        /// must use the same DbContext.
+        /// </summary>
+        /// <example>
+        /// using(var transaction = await repository.BeginTransaction()){
+        ///    repository.Save(entity);
+        ///    transaction.Commit();
+        /// }
+        /// </example>
+        /// <returns>A database transaction that should be committed.</returns>
+        Task<IDbContextTransaction> BeginTransaction();
+
         /// <summary>
         /// Returns the whole list of entities as a queryable.
         /// </summary>
@@ -77,6 +92,21 @@ namespace Smartive.Core.Database.Repositories
         /// <param name="entities">The entities to save.</param>
         /// <returns>The saved entities.</returns>
         Task<IEnumerable<TEntity>> Save(IEnumerable<TEntity> entities);
+
+        /// <summary>
+        /// Synchronizes a given list of entities (defined by the <paramref name="source"/> query)
+        /// with a given list of entities. This means, that the query is executed, then all entities
+        /// that are in the source but not in the given list, are deleted. All other elements are
+        /// created or updated according to their `Id` field.
+        /// </summary>
+        /// <param name="source">The source query for the synchronization.</param>
+        /// <param name="newEntities">The "master" list that will overwrite the source.</param>
+        /// <param name="useTransaction">If true, the sync collection should use a transaction to perform the sync.</param>
+        /// <returns>The updated list of entities.</returns>
+        Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+            IQueryable<TEntity> source,
+            IEnumerable<TEntity> newEntities,
+            bool useTransaction = false);
 
         /// <summary>
         /// Deletes a given entity.
