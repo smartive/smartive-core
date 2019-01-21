@@ -86,11 +86,25 @@ namespace Smartive.Core.Database.Repositories
         Task<TEntity> Delete(TEntity entity);
 
         /// <summary>
+        /// Deletes the given entities.
+        /// </summary>
+        /// <param name="entity">The entities to delete.</param>
+        /// <returns>The deleted entities.</returns>
+        Task<IEnumerable<TEntity>> Delete(IEnumerable<TEntity> entity);
+
+        /// <summary>
         /// Delete a given entity by it's key.
         /// </summary>
         /// <param name="id">The key to delete.</param>
         /// <returns>A task that resolves to the entity when the element is deleted.</returns>
         Task<TEntity> DeleteById(TKey id);
+
+        /// <summary>
+        /// Delete the given entities by it's keys.
+        /// </summary>
+        /// <param name="id">The keys to delete.</param>
+        /// <returns>A task that resolves to the entities when the elements are deleted.</returns>
+        Task<IEnumerable<TEntity>> DeleteById(IEnumerable<TKey> id);
     }
 
     /// <inheritdoc />

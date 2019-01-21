@@ -520,6 +520,28 @@ namespace Smartive.Core.Database.Test.Repositories
             result.Count().Should().Be(2);
         }
 
+        [Fact]
+        public async Task Test_Delete_Multiple_ById()
+        {
+            await InsertDemoData();
+
+            await _authors.DeleteById(new[] { 1, 2, 3 });
+
+            var result = await _authors.GetAll();
+            result.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public async Task Test_Delete_Multiple()
+        {
+            await InsertDemoData();
+
+            await _authors.Delete(new[] { new Author { Id = 1 }, new Author { Id = 2 }, new Author { Id = 3 } });
+
+            var result = await _authors.GetAll();
+            result.Count().Should().Be(0);
+        }
+
         private async Task InsertDemoData()
         {
             await _authors.Create(

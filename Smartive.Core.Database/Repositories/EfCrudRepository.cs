@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Smartive.Core.Database.Models;
@@ -48,8 +48,7 @@ namespace Smartive.Core.Database.Repositories
         /// <inheritdoc />
         public virtual async Task<IEnumerable<TEntity>> GetAll()
         {
-            var entities = await Entities.ToListAsync();
-            return entities;
+            return await Entities.ToListAsync();
         }
 
         /// <inheritdoc />
@@ -75,9 +74,7 @@ namespace Smartive.Core.Database.Repositories
                 return enumerable;
             }
 
-            await Entities.AddRangeAsync(enumerable);
-            await Context.SaveChangesAsync();
-            return enumerable;
+            return await ExecuteTransactional(() => Task.WhenAll(enumerable.Select(Create)));
         }
 
         /// <inheritdoc />
@@ -105,20 +102,7 @@ namespace Smartive.Core.Database.Repositories
                 return enumerable;
             }
 
-            foreach (var entity in enumerable)
-            {
-                if (IsTracked(entity, out var tracked))
-                {
-                    Context.Entry(tracked).CurrentValues.SetValues(entity);
-                }
-                else
-                {
-                    Entities.Update(entity);
-                }
-            }
-
-            await Context.SaveChangesAsync();
-            return enumerable;
+            return await ExecuteTransactional(() => Task.WhenAll(enumerable.Select(Update)));
         }
 
         /// <inheritdoc />
@@ -132,10 +116,12 @@ namespace Smartive.Core.Database.Repositories
         /// <inheritdoc />
         public virtual async Task<IEnumerable<TEntity>> Save(IEnumerable<TEntity> entities)
         {
-            var enumerable = entities.ToList();
-            return (await Create(enumerable.Where(entity => entity.Id.Equals(default))))
-                .Concat(
-                    await Update(enumerable.Where(entity => !entity.Id.Equals(default))));
+            using (var transaction = await Context.Database.BeginTransactionAsync())
+            {
+                var result = await Task.WhenAll(entities.Select(Save));
+                transaction.Commit();
+                return result;
+            }
         }
 
         /// <inheritdoc />
@@ -152,6 +138,18 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
+        public async Task<IEnumerable<TEntity>> Delete(IEnumerable<TEntity> entities)
+        {
+            var enumerable = entities.ToList();
+            if (enumerable.Count <= 0)
+            {
+                return enumerable;
+            }
+
+            return await ExecuteTransactional(() => Task.WhenAll(enumerable.Select(Delete)));
+        }
+
+        /// <inheritdoc />
         public virtual async Task<TEntity> DeleteById(TKey id)
         {
             var entity = await GetById(id);
@@ -163,6 +161,18 @@ namespace Smartive.Core.Database.Repositories
             Entities.Remove(entity);
             await Context.SaveChangesAsync();
             return entity;
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<TEntity>> DeleteById(IEnumerable<TKey> ids)
+        {
+            var enumerable = ids.ToList();
+            if (enumerable.Count <= 0)
+            {
+                return new List<TEntity>();
+            }
+
+            return await ExecuteTransactional(() => Task.WhenAll(enumerable.Select(DeleteById)));
         }
 
         /// <summary>
@@ -178,6 +188,22 @@ namespace Smartive.Core.Database.Repositories
             trackedEntity = Entities.Local.SingleOrDefault(
                 localEntity => localEntity == entity || localEntity.Id.Equals(entity.Id));
             return trackedEntity != null;
+        }
+
+        /// <summary>
+        /// Executes an action (or therefore multiple things) in a transaction.
+        /// </summary>
+        /// <param name="action">The action that should be performed.</param>
+        /// <typeparam name="TResult">Type of the result.</typeparam>
+        /// <returns>A task that resolves to the result.</returns>
+        protected async Task<TResult> ExecuteTransactional<TResult>(Func<Task<TResult>> action)
+        {
+            using (var transaction = await Context.Database.BeginTransactionAsync())
+            {
+                var result = await action();
+                transaction.Commit();
+                return result;
+            }
         }
     }
 
