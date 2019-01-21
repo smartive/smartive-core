@@ -52,6 +52,12 @@ Task("Coverage")
             Context.Tools.Resolve("ReportGenerator.dll").FullPath,
             ProcessArgumentBuilder.FromString(
                 "-reports:./coverage/*.xml -targetdir:./coverage/report -reporttypes:Badges;TextSummary;HTMLSummary"));
+    })
+    .Does(() =>
+    {
+        var summary = File("./coverage/report/Summary.txt");
+        Information("Calculated, combined coverage:");
+        Information(System.IO.File.ReadAllText(summary));
     });
 
 Task("Pack")

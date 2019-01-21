@@ -15,6 +15,7 @@ test:
   extends: .base
   script:
     - ./build.sh --target=Coverage
+  coverage: '/\s*Line coverage:\s([\d\.]+)%/'
   artifacts:
     paths:
       - coverage/
@@ -26,6 +27,7 @@ test:
 create release:
   extends: .create-release
   stage: release
+  dependencies: []
   only:
     - master
 
@@ -33,6 +35,8 @@ create release:
 
 publish:
   extends: .base
+  stage: deploy
+  dependencies: []
   script:
     - ./build.sh --target=Publish
   artifacts:
