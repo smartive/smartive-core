@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -105,6 +106,24 @@ namespace Smartive.Core.Database.Repositories
         /// <returns>The updated list of entities.</returns>
         Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             IQueryable<TEntity> source,
+            IEnumerable<TEntity> newEntities,
+            bool useTransaction = false);
+
+        /// <summary>
+        /// Synchronizes a given list of entities (defined by the <paramref name="source"/>)
+        /// with a given list of entities. This means, that the query is executed, then all entities
+        /// that are in the source but not in the given list, are deleted. All other elements are
+        /// created or updated according to their `Id` field.
+        /// </summary>
+        /// <param name="source">
+        /// A function that receives the whole collection as <see cref="IQueryable{T}"/>
+        /// and should return a <see cref="IQueryable{T}"/> that is executed.
+        /// </param>
+        /// <param name="newEntities">The "master" list that will overwrite the source.</param>
+        /// <param name="useTransaction">If true, the sync collection should use a transaction to perform the sync.</param>
+        /// <returns>The updated list of entities.</returns>
+        Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> source,
             IEnumerable<TEntity> newEntities,
             bool useTransaction = false);
 

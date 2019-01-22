@@ -718,6 +718,105 @@ namespace Smartive.Core.Database.Test.Repositories
         }
 
         [Fact]
+        public async Task Test_Synchronize_NavigationProperty_of_Author_With_Func()
+        {
+            await InsertDemoData();
+
+            var author = await _authors
+                .AsQueryable()
+                .Include(a => a.Books)
+                .SingleAsync(a => a.Id == 2);
+
+            author.Name = "Updated";
+            author.Books[0].Name = "Updated Book";
+
+            await _authors.Save(author);
+            var result = await _books.SynchronizeCollection(
+                books => books.Where(b => b.AuthorId == 2),
+                author.Books);
+
+            result.Added.Count().Should().Be(0);
+            result.Updated.Count().Should().Be(2);
+            result.Removed.Count().Should().Be(0);
+
+            author = await _authors
+                .AsQueryable()
+                .Include(a => a.Books)
+                .SingleAsync(a => a.Id == 2);
+
+            author.Name.Should().Be("Updated");
+            author.Books[0].Name.Should().Be("Updated Book");
+            author.Books[1].Name.Should().Be("B3");
+        }
+
+        [Fact]
+        public async Task Test_Synchronize_Transactional_NavigationProperty_of_Author_With_Func()
+        {
+            await InsertDemoData();
+
+            var author = await _authors
+                .AsQueryable()
+                .Include(a => a.Books)
+                .SingleAsync(a => a.Id == 2);
+
+            author.Name = "Updated";
+            author.Books[0].Name = "Updated Book";
+
+            await _authors.Save(author);
+            var result = await _books.SynchronizeCollection(
+                books => books.Where(b => b.AuthorId == 2),
+                author.Books,
+                true);
+
+            result.Added.Count().Should().Be(0);
+            result.Updated.Count().Should().Be(2);
+            result.Removed.Count().Should().Be(0);
+
+            author = await _authors
+                .AsQueryable()
+                .Include(a => a.Books)
+                .SingleAsync(a => a.Id == 2);
+
+            author.Name.Should().Be("Updated");
+            author.Books[0].Name.Should().Be("Updated Book");
+            author.Books[1].Name.Should().Be("B3");
+        }
+
+        [Fact]
+        public async Task Test_Synchronize_Author_And_Books_With_Transaction_and_Func()
+        {
+            await InsertDemoData();
+
+            var author = new Author { Id = 2, Name = "Updated" };
+            var books = new List<Book>
+            {
+                new Book { Id = 2, Name = "UpdatedBook", AuthorId = 2 },
+                new Book { Name = "New Book", AuthorId = 2 }
+            };
+
+            using (var t = await _authors.BeginTransaction())
+            {
+                author = await _authors.Save(author);
+                var sync = await _books.SynchronizeCollection(
+                    repoBooks => repoBooks.Where(o => o.AuthorId == 2),
+                    books);
+                t.Commit();
+
+                author.Books = sync.Synchronized.ToList();
+            }
+
+            var result = await _authors
+                .AsQueryable()
+                .Include(a => a.Books)
+                .SingleAsync(a => a.Id == 2);
+
+            result.Name.Should().Be("Updated");
+            result.Books.Count.Should().Be(2);
+            result.Books.Any(b => b.Name == "New Book").Should().BeTrue();
+            result.Books.Any(b => b.Name == "UpdatedBook").Should().BeTrue();
+        }
+
+        [Fact]
         public async Task Test_Throw_On_Duplicate_Id()
         {
             await InsertDemoData();
