@@ -183,14 +183,14 @@ namespace Smartive.Core.Database.Repositories
                 return new SynchronizationResult<TKey, TEntity>
                 {
                     Added = useTransaction
-                        ? (await Task.WhenAll(addEntities.Select(Create))).ToList()
-                        : await Create(addEntities),
+                        ? await Create(addEntities)
+                        : (await Task.WhenAll(addEntities.Select(Create))).ToList(),
                     Updated = useTransaction
-                        ? (await Task.WhenAll(existingEntities.Select(Update))).ToList()
-                        : await Update(existingEntities),
+                        ? await Update(existingEntities)
+                        : (await Task.WhenAll(existingEntities.Select(Update))).ToList(),
                     Removed = useTransaction
-                        ? (await Task.WhenAll(oldEntities.Select(Delete))).ToList()
-                        : await Delete(oldEntities)
+                        ? await Delete(oldEntities)
+                        : (await Task.WhenAll(oldEntities.Select(Delete))).ToList()
                 };
             }
 

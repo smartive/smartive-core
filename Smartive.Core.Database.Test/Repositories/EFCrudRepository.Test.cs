@@ -684,6 +684,40 @@ namespace Smartive.Core.Database.Test.Repositories
         }
 
         [Fact]
+        public async Task Test_Synchronize_Author_And_Books_With_Transaction()
+        {
+            await InsertDemoData();
+
+            var author = new Author { Id = 2, Name = "Updated" };
+            var books = new List<Book>
+            {
+                new Book { Id = 2, Name = "UpdatedBook", AuthorId = 2 },
+                new Book { Name = "New Book", AuthorId = 2 }
+            };
+
+            using (var t = await _authors.BeginTransaction())
+            {
+                author = await _authors.Save(author);
+                var sync = await _books.SynchronizeCollection(
+                    _books.AsQueryable().Where(o => o.AuthorId == 2),
+                    books);
+                t.Commit();
+
+                author.Books = sync.Synchronized.ToList();
+            }
+
+            var result = await _authors
+                .AsQueryable()
+                .Include(a => a.Books)
+                .SingleAsync(a => a.Id == 2);
+
+            result.Name.Should().Be("Updated");
+            result.Books.Count.Should().Be(2);
+            result.Books.Any(b => b.Name == "New Book").Should().BeTrue();
+            result.Books.Any(b => b.Name == "UpdatedBook").Should().BeTrue();
+        }
+
+        [Fact]
         public async Task Test_Throw_On_Duplicate_Id()
         {
             await InsertDemoData();
