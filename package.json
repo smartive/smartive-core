@@ -4,27 +4,24 @@
   "description": "core library for .net core projects of smartive AG",
   "repository": {
     "type": "git",
-    "url": "git@gitlab.com:smartive/open-source/smartive-core.git"
+    "url": "git@github.com:smartive/smartive-core.git"
   },
   "author": "Christoph Bühler <christoph@smartive.ch>",
   "license": "MIT",
   "devDependencies": {
-    "@semantic-release/gitlab": "^3.0.1",
-    "semantic-release": "^15.9.8"
+    "semantic-release": "^15.13.3"
   },
   "release": {
     "verifyConditions": [
       {
-        "path": "@semantic-release/gitlab"
+        "path": "@semantic-release/github"
       }
     ],
     "prepare": false,
     "publish": [
       {
-        "path": "@semantic-release/gitlab"
+        "path": "@semantic-release/github"
       }
-    ],
-    "success": false,
-    "fail": false
+    ]
   }
 }
