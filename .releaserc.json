@@ -1,5 +1,5 @@
 {
-  "repositoryUrl": "git+ssh://git@github.com:smartive/smartive-core.git",
+  "repositoryUrl": "https://github.com/smartive/smartive-core.git",
   "verifyConditions": "@semantic-release/github",
   "prepare": false,
   "publish": "@semantic-release/github"
