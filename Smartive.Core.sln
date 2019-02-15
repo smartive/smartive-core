@@ -10,7 +10,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Debug", "Smar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "etc", "etc", "{E5A71516-A7FC-40AE-8FFA-AFB2C6218E8F}"
 ProjectSection(SolutionItems) = preProject
-	package.json = package.json
 	.gitlab-ci.yml = .gitlab-ci.yml
 	.gitignore = .gitignore
 EndProjectSection
