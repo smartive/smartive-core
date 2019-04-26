@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Database", "Smartive.Core.Database\Smartive.Core.Database.csproj", "{806D6DDD-5297-41FD-A7D7-FCFBAA9F1125}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Database", "src\Smartive.Core.Database\Smartive.Core.Database.csproj", "{806D6DDD-5297-41FD-A7D7-FCFBAA9F1125}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Database.Test", "Smartive.Core.Database.Test\Smartive.Core.Database.Test.csproj", "{3701DDAD-348E-4986-9E71-301A95C6FCF7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Database.Test", "test\Smartive.Core.Database.Test\Smartive.Core.Database.Test.csproj", "{3701DDAD-348E-4986-9E71-301A95C6FCF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core", "Smartive.Core\Smartive.Core.csproj", "{12E88DE0-AF2B-432F-9B69-AD108DC08AF7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core", "src\Smartive.Core\Smartive.Core.csproj", "{12E88DE0-AF2B-432F-9B69-AD108DC08AF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Debug", "Smartive.Core.Debug\Smartive.Core.Debug.csproj", "{139C7146-9BB7-4527-A253-DDC3432E2185}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Debug", "src\Smartive.Core.Debug\Smartive.Core.Debug.csproj", "{139C7146-9BB7-4527-A253-DDC3432E2185}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "etc", "etc", "{E5A71516-A7FC-40AE-8FFA-AFB2C6218E8F}"
 ProjectSection(SolutionItems) = preProject
@@ -14,11 +14,19 @@ ProjectSection(SolutionItems) = preProject
 	.gitignore = .gitignore
 EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Debug.Test", "Smartive.Core.Debug.Test\Smartive.Core.Debug.Test.csproj", "{83791288-13D2-46CE-8F95-E9875A166AF1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Debug.Test", "test\Smartive.Core.Debug.Test\Smartive.Core.Debug.Test.csproj", "{83791288-13D2-46CE-8F95-E9875A166AF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Wpf", "Smartive.Core.Wpf\Smartive.Core.Wpf.csproj", "{73504858-105D-4628-A7B6-A004ACEBFCF7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Wpf", "src\Smartive.Core.Wpf\Smartive.Core.Wpf.csproj", "{73504858-105D-4628-A7B6-A004ACEBFCF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Wpf.Test", "Smartive.Core.Wpf.Test\Smartive.Core.Wpf.Test.csproj", "{F8D8C78B-5109-4DEC-AD82-218A786137BC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Wpf.Test", "test\Smartive.Core.Wpf.Test\Smartive.Core.Wpf.Test.csproj", "{F8D8C78B-5109-4DEC-AD82-218A786137BC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0604A1AD-412E-45B6-B99D-41401C2CE700}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{96CD0454-A053-4755-AA1D-4C39B883192C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{CF5E46EC-F8A8-45BB-A9DE-FBCBF565687B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{34ED2A0D-41F3-4C63-8599-4686C35ADE32}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +34,8 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{34ED2A0D-41F3-4C63-8599-4686C35ADE32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34ED2A0D-41F3-4C63-8599-4686C35ADE32}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{806D6DDD-5297-41FD-A7D7-FCFBAA9F1125}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{806D6DDD-5297-41FD-A7D7-FCFBAA9F1125}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{806D6DDD-5297-41FD-A7D7-FCFBAA9F1125}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -54,5 +64,15 @@ Global
 		{F8D8C78B-5109-4DEC-AD82-218A786137BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8D8C78B-5109-4DEC-AD82-218A786137BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8D8C78B-5109-4DEC-AD82-218A786137BC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{12E88DE0-AF2B-432F-9B69-AD108DC08AF7} = {0604A1AD-412E-45B6-B99D-41401C2CE700}
+		{806D6DDD-5297-41FD-A7D7-FCFBAA9F1125} = {0604A1AD-412E-45B6-B99D-41401C2CE700}
+		{139C7146-9BB7-4527-A253-DDC3432E2185} = {0604A1AD-412E-45B6-B99D-41401C2CE700}
+		{73504858-105D-4628-A7B6-A004ACEBFCF7} = {0604A1AD-412E-45B6-B99D-41401C2CE700}
+		{3701DDAD-348E-4986-9E71-301A95C6FCF7} = {96CD0454-A053-4755-AA1D-4C39B883192C}
+		{83791288-13D2-46CE-8F95-E9875A166AF1} = {96CD0454-A053-4755-AA1D-4C39B883192C}
+		{F8D8C78B-5109-4DEC-AD82-218A786137BC} = {96CD0454-A053-4755-AA1D-4C39B883192C}
+		{34ED2A0D-41F3-4C63-8599-4686C35ADE32} = {CF5E46EC-F8A8-45BB-A9DE-FBCBF565687B}
 	EndGlobalSection
 EndGlobal

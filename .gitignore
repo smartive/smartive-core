@@ -10,6 +10,7 @@ tools/
 nuget/
 artifacts/
 coverage/
+.tmp/
 
 # Build results
 [Dd]ebug/
@@ -18,7 +19,6 @@ coverage/
 [Rr]eleases/
 x64/
 x86/
-build/
 bld/
 [Bb]in/
 [Oo]bj/
