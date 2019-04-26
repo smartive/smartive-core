@@ -39,7 +39,7 @@ publish:
   stage: deploy
   dependencies: []
   script:
-    - ./build.sh --target=Publish
+    - ./build.sh --target Publish
   artifacts:
     paths:
       - artifacts/
