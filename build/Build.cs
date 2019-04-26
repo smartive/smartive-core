@@ -71,13 +71,11 @@ public class Build : NukeBuild
             DotNetRestore(s => s
                 .SetProjectFile(Solution));
 
-            foreach (var tool in _tools.Where(t => !FileExists(ToolsDirectory / t.Executable)))
-            {
-                DotNetToolInstall(s => s
-                    .SetToolInstallationPath(ToolsDirectory)
-                    .SetPackageName(tool.PackageName)
-                    .SetVersion(tool.Version));
-            }
+            DotNetToolInstall(s => s
+                .SetToolInstallationPath(ToolsDirectory)
+                .CombineWith(_tools.Where(t => !FileExists(ToolsDirectory / t.Executable)), (ss, tool) => ss
+                    .SetVersion(tool.Version)
+                    .SetPackageName(tool.PackageName)), Environment.ProcessorCount);
         });
 
     Target Compile => _ => _
@@ -99,23 +97,17 @@ public class Build : NukeBuild
         })
         .Executes(() =>
         {
-            foreach (var testProject in TestProjects)
-            {
-                Logger.Info($"Test & Coverage for {testProject.Name}");
-
-                var testSettings = new DotNetTestSettings()
-                    .EnableNoBuild()
-                    .SetProjectFile(testProject)
-                    .SetConfiguration(Configuration);
-
-                CoverletTasks.Coverlet(s => s
-                    .SetTargetSettings(testSettings)
-                    .SetAssembly(testProject.Directory / $"bin/{Configuration}/{testProject.Name}.dll")
-                    .SetFormat(CoverletOutputFormat.opencover)
-                    .SetOutput(CoverageDirectory / $"cov-{testProject.Name}-{DateTime.UtcNow:dd-MM-yyyy-HH-mm-ss}.xml")
-                    .SetToolPath(ToolsDirectory / "coverlet")
-                    .AddExclude("[xunit.*]*", "[*.Test]*"));
-            }
+            CoverletTasks.Coverlet(s => s
+                .SetFormat(CoverletOutputFormat.opencover)
+                .SetToolPath(ToolsDirectory / "coverlet")
+                .AddExclude("[xunit.*]*", "[*.Test]*")
+                .CombineWith(TestProjects, (ss, project) => ss
+                    .SetAssembly(project.Directory / $"bin/{Configuration}/{project.Name}.dll")
+                    .SetOutput(CoverageDirectory / $"cov-{project.Name}-{DateTime.UtcNow:dd-MM-yyyy-HH-mm-ss}.xml")
+                    .SetTargetSettings(new DotNetTestSettings()
+                        .EnableNoBuild()
+                        .SetProjectFile(project)
+                        .SetConfiguration(Configuration))), Environment.ProcessorCount);
         });
 
     Target CoverageReport => _ => _
@@ -143,17 +135,15 @@ public class Build : NukeBuild
         .Executes(() =>
         {
             Logger.Info($"Pack the projects for version {Version}");
-            foreach(var project in SourceProjects)
-            {
-                DotNetPack(s => s
-                    .EnableNoBuild()
-                    .SetConfiguration(Configuration)
-                    .SetProject(project)
-                    .SetOutputDirectory(ArtifactsDirectory)
-                    .SetVersion(Version)
-                    .SetFileVersion(Version)
-                    .SetAssemblyVersion(Version));
-            }
+            DotNetPack(s => s
+                .EnableNoBuild()
+                .SetConfiguration(Configuration)
+                .SetOutputDirectory(ArtifactsDirectory)
+                .SetVersion(Version)
+                .SetFileVersion(Version)
+                .SetAssemblyVersion(Version)
+                .CombineWith(SourceProjects, (ss, project) => ss
+                    .SetProject(project)), Environment.ProcessorCount);
         });
 
     Target Publish => _ => _
@@ -162,13 +152,10 @@ public class Build : NukeBuild
         .Executes(() =>
         {
             Logger.Info("Publish Packages");
-
-            foreach (var package in ArtifactsDirectory.GlobFiles("*.nupkg"))
-            {
-                DotNetNuGetPush(s => s
+            DotNetNuGetPush(s => s
                     .SetApiKey(NugetKey)
                     .SetSource(NugetSource)
-                    .SetTargetPath(package));
-            }
+                    .CombineWith(ArtifactsDirectory.GlobFiles("*.nupkg"), (ss, file) => ss.SetTargetPath(file)),
+                Environment.ProcessorCount);
         });
 }
