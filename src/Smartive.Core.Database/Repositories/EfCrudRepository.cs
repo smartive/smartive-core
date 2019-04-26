@@ -73,6 +73,17 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
+        public async Task<TResult> QuerySingle<TResult>(Func<IQueryable<TEntity>, IQueryable<TResult>> query)
+        {
+            if (query == null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+
+            return await query(AsQueryable()).SingleOrDefaultAsync();
+        }
+
+        /// <inheritdoc />
         public virtual async Task<TEntity> Create(TEntity entity)
         {
             if (entity == null)

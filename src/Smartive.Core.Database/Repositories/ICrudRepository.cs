@@ -59,6 +59,14 @@ namespace Smartive.Core.Database.Repositories
         Task<IList<TResult>> Query<TResult>(Func<IQueryable<TEntity>, IQueryable<TResult>> query);
 
         /// <summary>
+        /// Runs a query against this repository. Injects the queryable of the repository.
+        /// </summary>
+        /// <param name="query">Query that should be executed.</param>
+        /// <typeparam name="TResult">Type of the result that will be returned.</typeparam>
+        /// <returns>A result that are returned by the given query.</returns>
+        Task<TResult> QuerySingle<TResult>(Func<IQueryable<TEntity>, IQueryable<TResult>> query);
+
+        /// <summary>
         /// Create the given entity in the context.
         /// </summary>
         /// <param name="entity">Entity to save.</param>
