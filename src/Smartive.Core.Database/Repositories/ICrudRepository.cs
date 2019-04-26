@@ -115,7 +115,7 @@ namespace Smartive.Core.Database.Repositories
         Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             IQueryable<TEntity> source,
             IEnumerable<TEntity> newEntities,
-            bool useTransaction = true);
+            bool useTransaction = false);
 
         /// <summary>
         /// Synchronizes a given list of entities (defined by the <paramref name="source"/>)
@@ -133,7 +133,7 @@ namespace Smartive.Core.Database.Repositories
         Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             Func<IQueryable<TEntity>, IQueryable<TEntity>> source,
             IEnumerable<TEntity> newEntities,
-            bool useTransaction = true);
+            bool useTransaction = false);
 
         /// <summary>
         /// Deletes a given entity.

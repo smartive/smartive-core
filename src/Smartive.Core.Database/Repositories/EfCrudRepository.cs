@@ -173,7 +173,7 @@ namespace Smartive.Core.Database.Repositories
         public Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             IQueryable<TEntity> source,
             IEnumerable<TEntity> newEntities,
-            bool useTransaction = true)
+            bool useTransaction = false)
         {
             var newList = newEntities.ToList();
 
@@ -208,7 +208,7 @@ namespace Smartive.Core.Database.Repositories
         public Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             Func<IQueryable<TEntity>, IQueryable<TEntity>> source,
             IEnumerable<TEntity> newEntities,
-            bool useTransaction = true)
+            bool useTransaction = false)
         {
             return SynchronizeCollection(source(AsQueryable()), newEntities, useTransaction);
         }
