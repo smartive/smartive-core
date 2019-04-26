@@ -11,7 +11,7 @@ namespace Smartive.Core.Database.Test
         {
             Context = new TestDataContext();
         }
-        
+
         public TestDataContext Context { get; }
 
         public void Dispose()
@@ -19,7 +19,7 @@ namespace Smartive.Core.Database.Test
             Context?.Dispose();
         }
     }
-    
+
     public class TestDataContext : DbContext
     {
         private readonly string _dbName;
@@ -36,8 +36,6 @@ namespace Smartive.Core.Database.Test
                     .Options)
         {
             _dbName = dbName;
-            Setup();
-            Clean();
         }
 
         public DbSet<Author> Authors { get; set; }
@@ -45,6 +43,18 @@ namespace Smartive.Core.Database.Test
         public DbSet<Book> Books { get; set; }
 
         public DbSet<Comment> Comments { get; set; }
+
+        public DbSet<User> Users { get; set; }
+
+        public DbSet<UserItem> UserItems { get; set; }
+
+        public static TestDataContext PreparedDb()
+        {
+            var ctx = new TestDataContext();
+            ctx.Setup();
+            ctx.Clean();
+            return ctx;
+        }
 
         public void Setup()
         {
@@ -56,6 +66,8 @@ namespace Smartive.Core.Database.Test
             Authors.RemoveRange(Authors);
             Books.RemoveRange(Books);
             Comments.RemoveRange(Comments);
+            Users.RemoveRange(Users);
+            UserItems.RemoveRange(UserItems);
 
             SaveChanges();
         }
@@ -79,6 +91,11 @@ namespace Smartive.Core.Database.Test
                 .Entity<Book>()
                 .HasMany(book => book.Comments)
                 .WithOne(comment => comment.Book);
+
+            modelBuilder
+                .Entity<User>()
+                .HasMany(u => u.UserItems)
+                .WithOne(u => u.User);
         }
     }
 }

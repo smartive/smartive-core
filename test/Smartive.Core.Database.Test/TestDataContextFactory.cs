@@ -6,7 +6,7 @@ namespace Smartive.Core.Database.Test
     {
         public TestDataContext CreateDbContext(string[] _)
         {
-            return new TestDataContext();
+            return new TestDataContext("design-db");
         }
     }
 }

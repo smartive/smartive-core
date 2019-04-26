@@ -13,7 +13,7 @@ namespace Smartive.Core.Database.Test.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024");
+                .HasAnnotation("ProductVersion", "2.2.4-servicing-10062");
 
             modelBuilder.Entity("Smartive.Core.Database.Test.Models.Author", b =>
                 {
@@ -64,6 +64,35 @@ namespace Smartive.Core.Database.Test.Migrations
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("Smartive.Core.Database.Test.Models.User", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Smartive.Core.Database.Test.Models.UserItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("UserId")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserItems");
+                });
+
             modelBuilder.Entity("Smartive.Core.Database.Test.Models.Book", b =>
                 {
                     b.HasOne("Smartive.Core.Database.Test.Models.Author", "Author")
@@ -77,6 +106,14 @@ namespace Smartive.Core.Database.Test.Migrations
                     b.HasOne("Smartive.Core.Database.Test.Models.Book", "Book")
                         .WithMany("Comments")
                         .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Smartive.Core.Database.Test.Models.UserItem", b =>
+                {
+                    b.HasOne("Smartive.Core.Database.Test.Models.User", "User")
+                        .WithMany("UserItems")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

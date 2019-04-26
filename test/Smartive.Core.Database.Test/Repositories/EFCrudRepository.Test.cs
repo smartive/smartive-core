@@ -20,7 +20,7 @@ namespace Smartive.Core.Database.Test.Repositories
 
         public EfCrudRepositoryTest()
         {
-            _context = new TestDataContext();
+            _context = TestDataContext.PreparedDb();
             _authors = new EfCrudRepository<Author>(_context);
             _books = new EfCrudRepository<Book>(_context);
             _comments = new EfCrudRepository<Comment>(_context);
@@ -488,7 +488,7 @@ namespace Smartive.Core.Database.Test.Repositories
 
             var result = await _authors.GetAll();
 
-            result.Count().Should().Be(3);
+            result.Count.Should().Be(3);
         }
 
         [Fact]
