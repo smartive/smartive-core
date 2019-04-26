@@ -41,7 +41,7 @@ namespace Smartive.Core.Database.Repositories
         /// Returns all entities (select * from ...).
         /// </summary>
         /// <returns>An enumerable list of all entities.</returns>
-        Task<IEnumerable<TEntity>> GetAll();
+        Task<IList<TEntity>> GetAll();
 
         /// <summary>
         /// Return an entity by it's key.
@@ -49,6 +49,14 @@ namespace Smartive.Core.Database.Repositories
         /// <param name="id">The given Id to search.</param>
         /// <returns>The entity, or default(Type) if no entity is found.</returns>
         Task<TEntity> GetById(TKey id);
+
+        /// <summary>
+        /// Runs a query against this repository. Injects the queryable of the repository.
+        /// </summary>
+        /// <param name="query">Query that should be executed.</param>
+        /// <typeparam name="TResult">Type of the result that will be returned.</typeparam>
+        /// <returns>A list of results that are returned by the given query.</returns>
+        Task<IList<TResult>> Query<TResult>(Func<IQueryable<TEntity>, IQueryable<TResult>> query);
 
         /// <summary>
         /// Create the given entity in the context.
@@ -62,7 +70,7 @@ namespace Smartive.Core.Database.Repositories
         /// </summary>
         /// <param name="entities">Entities to save.</param>
         /// <returns>The created entities with the set Ids.</returns>
-        Task<IEnumerable<TEntity>> Create(IEnumerable<TEntity> entities);
+        Task<IList<TEntity>> Create(IEnumerable<TEntity> entities);
 
         /// <summary>
         /// Update the given entity. This updates all properties on the entity.
@@ -76,7 +84,7 @@ namespace Smartive.Core.Database.Repositories
         /// </summary>
         /// <param name="entities">The entities to update.</param>
         /// <returns>The updated entities.</returns>
-        Task<IEnumerable<TEntity>> Update(IEnumerable<TEntity> entities);
+        Task<IList<TEntity>> Update(IEnumerable<TEntity> entities);
 
         /// <summary>
         /// Saves the given entity. Save means, `if Id == default then create else update`.
@@ -92,7 +100,7 @@ namespace Smartive.Core.Database.Repositories
         /// </summary>
         /// <param name="entities">The entities to save.</param>
         /// <returns>The saved entities.</returns>
-        Task<IEnumerable<TEntity>> Save(IEnumerable<TEntity> entities);
+        Task<IList<TEntity>> Save(IEnumerable<TEntity> entities);
 
         /// <summary>
         /// Synchronizes a given list of entities (defined by the <paramref name="source"/> query)
@@ -107,7 +115,7 @@ namespace Smartive.Core.Database.Repositories
         Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             IQueryable<TEntity> source,
             IEnumerable<TEntity> newEntities,
-            bool useTransaction = false);
+            bool useTransaction = true);
 
         /// <summary>
         /// Synchronizes a given list of entities (defined by the <paramref name="source"/>)
@@ -125,7 +133,7 @@ namespace Smartive.Core.Database.Repositories
         Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             Func<IQueryable<TEntity>, IQueryable<TEntity>> source,
             IEnumerable<TEntity> newEntities,
-            bool useTransaction = false);
+            bool useTransaction = true);
 
         /// <summary>
         /// Deletes a given entity.
@@ -139,7 +147,7 @@ namespace Smartive.Core.Database.Repositories
         /// </summary>
         /// <param name="entity">The entities to delete.</param>
         /// <returns>The deleted entities.</returns>
-        Task<IEnumerable<TEntity>> Delete(IEnumerable<TEntity> entity);
+        Task<IList<TEntity>> Delete(IEnumerable<TEntity> entity);
 
         /// <summary>
         /// Delete a given entity by it's key.
@@ -153,7 +161,7 @@ namespace Smartive.Core.Database.Repositories
         /// </summary>
         /// <param name="id">The keys to delete.</param>
         /// <returns>A task that resolves to the entities when the elements are deleted.</returns>
-        Task<IEnumerable<TEntity>> DeleteById(IEnumerable<TKey> id);
+        Task<IList<TEntity>> DeleteById(IEnumerable<TKey> id);
     }
 
     /// <inheritdoc />
