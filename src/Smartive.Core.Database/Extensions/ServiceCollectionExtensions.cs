@@ -21,7 +21,7 @@ namespace Smartive.Core.Database.Extensions
         /// <returns>The <see cref="IServiceCollection"/> for chaining</returns>
         public static IServiceCollection AddRepository<TEntity, TContext>(
             this IServiceCollection collection,
-            ServiceLifetime lifetime = ServiceLifetime.Scoped)
+            ServiceLifetime lifetime = ServiceLifetime.Transient)
             where TEntity : Base
             where TContext : DbContext
         {
@@ -30,6 +30,7 @@ namespace Smartive.Core.Database.Extensions
                     typeof(ICrudRepository<TEntity>),
                     provider => new EfCrudRepository<TEntity, TContext>(provider.GetService<TContext>()),
                     lifetime));
+            ModelExtensions.ModelRepositories[typeof(TEntity)] = typeof(ICrudRepository<TEntity>);
 
             return collection;
         }
@@ -46,7 +47,7 @@ namespace Smartive.Core.Database.Extensions
         /// <returns>The <see cref="IServiceCollection"/> for chaining</returns>
         public static IServiceCollection AddRepository<TKey, TEntity, TContext>(
             this IServiceCollection collection,
-            ServiceLifetime lifetime = ServiceLifetime.Scoped)
+            ServiceLifetime lifetime = ServiceLifetime.Transient)
             where TEntity : Base<TKey>
             where TContext : DbContext
         {
@@ -55,6 +56,62 @@ namespace Smartive.Core.Database.Extensions
                     typeof(ICrudRepository<TKey, TEntity>),
                     provider => new EfCrudRepository<TKey, TEntity, TContext>(provider.GetService<TContext>()),
                     lifetime));
+            ModelExtensions.ModelRepositories[typeof(TEntity)] = typeof(ICrudRepository<TKey, TEntity>);
+
+            return collection;
+        }
+
+        /// <summary>
+        /// Add a repository of the given entity to the service collection.
+        /// This extension method must be used if custom subclasses of the <see cref="EfCrudRepository{TEntity,TContext}"/>
+        /// was used since there are more special methods in the repository.
+        /// (It's like <see cref="AddRepository{TEntity,TContext}"/> but for custom subclassed repositories.)
+        /// </summary>
+        /// <param name="collection">The service-collection.</param>
+        /// <param name="lifetime">The lifetime of the service.</param>
+        /// <typeparam name="TEntity">The entity type.</typeparam>
+        /// <typeparam name="TRepository">The type of the repository.</typeparam>
+        /// <returns>The given service collection.</returns>
+        public static IServiceCollection AddCustomRepository<TEntity, TRepository>(
+            this IServiceCollection collection,
+            ServiceLifetime lifetime = ServiceLifetime.Transient)
+            where TEntity : Base
+            where TRepository : ICrudRepository<TEntity>
+        {
+            collection.Add(
+                new ServiceDescriptor(
+                    typeof(TRepository),
+                    typeof(TRepository),
+                    lifetime));
+            ModelExtensions.ModelRepositories[typeof(TEntity)] = typeof(TRepository);
+
+            return collection;
+        }
+
+        /// <summary>
+        /// Add a repository of the given entity to the service collection.
+        /// This extension method must be used if custom subclasses of the <see cref="EfCrudRepository{TKey,TEntity,TContext}"/>
+        /// was used since there are more special methods in the repository.
+        /// (It's like <see cref="AddRepository{TKey,TEntity,TContext}"/> but for custom subclassed repositories.)
+        /// </summary>
+        /// <param name="collection">The service-collection.</param>
+        /// <param name="lifetime">The lifetime of the service.</param>
+        /// <typeparam name="TKey">The entity id type.</typeparam>
+        /// <typeparam name="TEntity">The entity type.</typeparam>
+        /// <typeparam name="TRepository">The type of the repository.</typeparam>
+        /// <returns>The given service collection.</returns>
+        public static IServiceCollection AddCustomRepository<TKey, TEntity, TRepository>(
+            this IServiceCollection collection,
+            ServiceLifetime lifetime = ServiceLifetime.Transient)
+            where TEntity : Base<TKey>
+            where TRepository : ICrudRepository<TKey, TEntity>
+        {
+            collection.Add(
+                new ServiceDescriptor(
+                    typeof(TRepository),
+                    typeof(TRepository),
+                    lifetime));
+            ModelExtensions.ModelRepositories[typeof(TEntity)] = typeof(TRepository);
 
             return collection;
         }
