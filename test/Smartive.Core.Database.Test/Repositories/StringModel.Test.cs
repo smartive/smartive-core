@@ -39,6 +39,39 @@ namespace Smartive.Core.Database.Test.Repositories
         }
 
         [Fact]
+        public async Task Test_Save_Insert_User()
+        {
+            var user = new User
+            {
+                Id = "foobar-id",
+                Name = "name"
+            };
+
+            var dbUser = await _users.GetById("foobar-id");
+            dbUser.Should().BeNull();
+            await _users.Save(user);
+            dbUser = await _users.GetById("foobar-id");
+            dbUser.Should().NotBeNull();
+        }
+
+        [Fact]
+        public async Task Test_Save_Update_User()
+        {
+            await InsertDemoData();
+
+            var user = new User
+            {
+                Id = "user2",
+                Name = "name"
+            };
+
+            await _users.Save(user);
+
+            user = await _users.GetById("user2");
+            user.Name.Should().Be("name");
+        }
+
+        [Fact]
         public async Task Test_Update_User()
         {
             await InsertDemoData();

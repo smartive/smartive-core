@@ -19,6 +19,7 @@ namespace Smartive.Core.Database.Repositories
     {
         /// <summary>
         /// Starts a transaction on the given db context.
+        /// If a transaction is already in progress, the current transaction is returned.
         /// Be advised, that a transaction can be "used" by other repositories, but they
         /// must use the same DbContext.
         /// </summary>
@@ -29,7 +30,7 @@ namespace Smartive.Core.Database.Repositories
         /// }
         /// </example>
         /// <returns>A database transaction that should be committed.</returns>
-        Task<IDbContextTransaction> BeginTransaction();
+        Task<IDbContextTransaction> Transaction();
 
         /// <summary>
         /// Returns the whole list of entities as a queryable.

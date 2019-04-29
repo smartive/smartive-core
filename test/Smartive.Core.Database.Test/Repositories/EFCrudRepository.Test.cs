@@ -549,7 +549,7 @@ namespace Smartive.Core.Database.Test.Repositories
         {
             await InsertDemoData();
 
-            using (var t = await _authors.BeginTransaction())
+            using (var t = await _authors.Transaction())
             {
                 await _authors.Create(new Author { Name = "A4" });
                 await _authors.Update(new Author { Id = 1, Name = "Transaction" });
@@ -695,7 +695,7 @@ namespace Smartive.Core.Database.Test.Repositories
                 new Book { Name = "New Book", AuthorId = 2 }
             };
 
-            using (var t = await _authors.BeginTransaction())
+            using (var t = await _authors.Transaction())
             {
                 author = await _authors.Save(author);
                 var sync = await _books.SynchronizeCollection(
@@ -794,7 +794,7 @@ namespace Smartive.Core.Database.Test.Repositories
                 new Book { Name = "New Book", AuthorId = 2 }
             };
 
-            using (var t = await _authors.BeginTransaction())
+            using (var t = await _authors.Transaction())
             {
                 author = await _authors.Save(author);
                 var sync = await _books.SynchronizeCollection(
