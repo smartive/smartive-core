@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Smartive.Core.Database.Models;
 using Smartive.Core.Database.Repositories;
 using Smartive.Core.Database.Test.Models;
 using Xunit;
@@ -626,14 +627,18 @@ namespace Smartive.Core.Database.Test.Repositories
         {
             await InsertDemoData();
 
-            var syncResult = await _authors.SynchronizeCollection(
-                _authors.AsQueryable(),
-                new[]
-                {
-                    new Author { Id = 1, Name = "Updated" },
-                    new Author { Name = "NewOne" }
-                },
-                true);
+            SynchronizationResult<int, Author> syncResult;
+            using (var t = await _authors.Transaction())
+            {
+                syncResult = await _authors.SynchronizeCollection(
+                    _authors.AsQueryable(),
+                    new[]
+                    {
+                        new Author { Id = 1, Name = "Updated" },
+                        new Author { Name = "NewOne" }
+                    });
+                t.Commit();
+            }
 
             var a = syncResult.Added.ToList();
             var u = syncResult.Updated.ToList();
@@ -664,10 +669,14 @@ namespace Smartive.Core.Database.Test.Repositories
             author.Books[0].Name = "Updated Book";
 
             await _authors.Save(author);
-            var result = await _books.SynchronizeCollection(
-                _books.AsQueryable().Where(b => b.AuthorId == 2),
-                author.Books,
-                true);
+            SynchronizationResult<int, Book> result;
+            using (var t = await _authors.Transaction())
+            {
+                result = await _books.SynchronizeCollection(
+                    _books.AsQueryable().Where(b => b.AuthorId == 2),
+                    author.Books);
+                t.Commit();
+            }
 
             result.Added.Count().Should().Be(0);
             result.Updated.Count().Should().Be(2);
@@ -763,10 +772,14 @@ namespace Smartive.Core.Database.Test.Repositories
             author.Books[0].Name = "Updated Book";
 
             await _authors.Save(author);
-            var result = await _books.SynchronizeCollection(
-                books => books.Where(b => b.AuthorId == 2),
-                author.Books,
-                true);
+            SynchronizationResult<int, Book> result;
+            using (var t = await _authors.Transaction())
+            {
+                result = await _books.SynchronizeCollection(
+                    books => books.Where(b => b.AuthorId == 2),
+                    author.Books);
+                t.Commit();
+            }
 
             result.Added.Count().Should().Be(0);
             result.Updated.Count().Should().Be(2);

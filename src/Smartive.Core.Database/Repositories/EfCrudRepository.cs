@@ -51,18 +51,6 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public virtual async Task<IList<TEntity>> GetAll()
-        {
-            return await Entities.ToListAsync();
-        }
-
-        /// <inheritdoc />
-        public virtual Task<TEntity> GetById(TKey id)
-        {
-            return Entities.SingleOrDefaultAsync(e => e.Id.Equals(id));
-        }
-
-        /// <inheritdoc />
         public async Task<IList<TResult>> Query<TResult>(Func<IQueryable<TEntity>, IQueryable<TResult>> query)
         {
             if (query == null)
@@ -82,6 +70,18 @@ namespace Smartive.Core.Database.Repositories
             }
 
             return await query(AsQueryable()).SingleOrDefaultAsync();
+        }
+
+        /// <inheritdoc />
+        public virtual async Task<IList<TEntity>> GetAll()
+        {
+            return await Entities.ToListAsync();
+        }
+
+        /// <inheritdoc />
+        public virtual Task<TEntity> GetById(TKey id)
+        {
+            return Entities.SingleOrDefaultAsync(e => e.Id.Equals(id));
         }
 
         /// <inheritdoc />
@@ -174,72 +174,13 @@ namespace Smartive.Core.Database.Repositories
                 throw new ArgumentNullException(nameof(entities));
             }
 
-            using (var transaction = await Transaction())
+            var list = entities.ToList();
+            foreach (var entity in list)
             {
-                var result = await Task.WhenAll(entities.Select(Save));
-                transaction.Commit();
-                return result;
-            }
-        }
-
-        /// <inheritdoc />
-        public async Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
-            IQueryable<TEntity> source,
-            IEnumerable<TEntity> newEntities,
-            bool useTransaction = false)
-        {
-            var newList = newEntities.ToList();
-            var entities = await source.ToListAsync();
-
-            var addEntities = new List<TEntity>();
-            var editEntities = new List<TEntity>();
-
-            foreach (var entity in newList)
-            {
-                if (await ExistsInDatabase(entity))
-                {
-                    editEntities.Add(entity);
-                }
-                else
-                {
-                    addEntities.Add(entity);
-                }
+                await Save(entity);
             }
 
-            var oldEntities = entities
-                .Where(entity => !newList.Any(newEntity => entity.Id.Equals(newEntity.Id)))
-                .ToList();
-
-            if (!useTransaction)
-            {
-                return new SynchronizationResult<TKey, TEntity>
-                {
-                    Added = await Create(addEntities),
-                    Updated = await Update(editEntities),
-                    Removed = await Delete(oldEntities)
-                };
-            }
-
-            using (var transaction = await Transaction())
-            {
-                var result = new SynchronizationResult<TKey, TEntity>
-                {
-                    Added = await Create(addEntities),
-                    Updated = await Update(editEntities),
-                    Removed = await Delete(oldEntities)
-                };
-                transaction.Commit();
-                return result;
-            }
-        }
-
-        /// <inheritdoc />
-        public Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
-            Func<IQueryable<TEntity>, IQueryable<TEntity>> source,
-            IEnumerable<TEntity> newEntities,
-            bool useTransaction = false)
-        {
-            return SynchronizeCollection(source(AsQueryable()), newEntities, useTransaction);
+            return list;
         }
 
         /// <inheritdoc />
@@ -317,6 +258,49 @@ namespace Smartive.Core.Database.Repositories
             }
 
             return entities;
+        }
+
+        /// <inheritdoc />
+        public async Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+            IQueryable<TEntity> source,
+            IEnumerable<TEntity> newEntities)
+        {
+            var newList = newEntities.ToList();
+            var entities = await source.ToListAsync();
+
+            var addEntities = new List<TEntity>();
+            var editEntities = new List<TEntity>();
+
+            foreach (var entity in newList)
+            {
+                if (await ExistsInDatabase(entity))
+                {
+                    editEntities.Add(entity);
+                }
+                else
+                {
+                    addEntities.Add(entity);
+                }
+            }
+
+            var oldEntities = entities
+                .Where(entity => !newList.Any(newEntity => entity.Id.Equals(newEntity.Id)))
+                .ToList();
+
+            return new SynchronizationResult<TKey, TEntity>
+            {
+                Added = await Create(addEntities),
+                Updated = await Update(editEntities),
+                Removed = await Delete(oldEntities)
+            };
+        }
+
+        /// <inheritdoc />
+        public Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> source,
+            IEnumerable<TEntity> newEntities)
+        {
+            return SynchronizeCollection(source(AsQueryable()), newEntities);
         }
 
         /// <summary>

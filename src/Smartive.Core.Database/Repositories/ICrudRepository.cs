@@ -22,6 +22,10 @@ namespace Smartive.Core.Database.Repositories
         /// If a transaction is already in progress, the current transaction is returned.
         /// Be advised, that a transaction can be "used" by other repositories, but they
         /// must use the same DbContext.
+        ///
+        /// All methods of the repository mustn't use transactions. If you want to utilize transactions,
+        /// use the `Transaction()` method to get the transaction, perform all actions in it, and then
+        /// commit the result.
         /// </summary>
         /// <example>
         /// using(var transaction = await repository.BeginTransaction()){
@@ -39,6 +43,24 @@ namespace Smartive.Core.Database.Repositories
         IQueryable<TEntity> AsQueryable();
 
         /// <summary>
+        /// Runs a query against this repository. Injects the queryable of the repository.
+        /// `.ToListAsync()` should be executed on the queryable.
+        /// </summary>
+        /// <param name="query">Query that should be executed.</param>
+        /// <typeparam name="TResult">Type of the result that will be returned.</typeparam>
+        /// <returns>A list of results that are returned by the given query.</returns>
+        Task<IList<TResult>> Query<TResult>(Func<IQueryable<TEntity>, IQueryable<TResult>> query);
+
+        /// <summary>
+        /// Runs a query against this repository. Injects the queryable of the repository.
+        /// `.SingleOrDefaultAsync()` should be executed on the queryable.
+        /// </summary>
+        /// <param name="query">Query that should be executed.</param>
+        /// <typeparam name="TResult">Type of the result that will be returned.</typeparam>
+        /// <returns>A result that are returned by the given query.</returns>
+        Task<TResult> QuerySingle<TResult>(Func<IQueryable<TEntity>, IQueryable<TResult>> query);
+
+        /// <summary>
         /// Returns all entities (select * from ...).
         /// </summary>
         /// <returns>An enumerable list of all entities.</returns>
@@ -50,22 +72,6 @@ namespace Smartive.Core.Database.Repositories
         /// <param name="id">The given Id to search.</param>
         /// <returns>The entity, or default(Type) if no entity is found.</returns>
         Task<TEntity> GetById(TKey id);
-
-        /// <summary>
-        /// Runs a query against this repository. Injects the queryable of the repository.
-        /// </summary>
-        /// <param name="query">Query that should be executed.</param>
-        /// <typeparam name="TResult">Type of the result that will be returned.</typeparam>
-        /// <returns>A list of results that are returned by the given query.</returns>
-        Task<IList<TResult>> Query<TResult>(Func<IQueryable<TEntity>, IQueryable<TResult>> query);
-
-        /// <summary>
-        /// Runs a query against this repository. Injects the queryable of the repository.
-        /// </summary>
-        /// <param name="query">Query that should be executed.</param>
-        /// <typeparam name="TResult">Type of the result that will be returned.</typeparam>
-        /// <returns>A result that are returned by the given query.</returns>
-        Task<TResult> QuerySingle<TResult>(Func<IQueryable<TEntity>, IQueryable<TResult>> query);
 
         /// <summary>
         /// Create the given entity in the context.
@@ -112,39 +118,6 @@ namespace Smartive.Core.Database.Repositories
         Task<IList<TEntity>> Save(IEnumerable<TEntity> entities);
 
         /// <summary>
-        /// Synchronizes a given list of entities (defined by the <paramref name="source"/> query)
-        /// with a given list of entities. This means, that the query is executed, then all entities
-        /// that are in the source but not in the given list, are deleted. All other elements are
-        /// created or updated according to their `Id` field.
-        /// </summary>
-        /// <param name="source">The source query for the synchronization.</param>
-        /// <param name="newEntities">The "master" list that will overwrite the source.</param>
-        /// <param name="useTransaction">If true, the sync collection should use a transaction to perform the sync.</param>
-        /// <returns>The updated list of entities.</returns>
-        Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
-            IQueryable<TEntity> source,
-            IEnumerable<TEntity> newEntities,
-            bool useTransaction = false);
-
-        /// <summary>
-        /// Synchronizes a given list of entities (defined by the <paramref name="source"/>)
-        /// with a given list of entities. This means, that the query is executed, then all entities
-        /// that are in the source but not in the given list, are deleted. All other elements are
-        /// created or updated according to their `Id` field.
-        /// </summary>
-        /// <param name="source">
-        /// A function that receives the whole collection as <see cref="IQueryable{T}"/>
-        /// and should return a <see cref="IQueryable{T}"/> that is executed.
-        /// </param>
-        /// <param name="newEntities">The "master" list that will overwrite the source.</param>
-        /// <param name="useTransaction">If true, the sync collection should use a transaction to perform the sync.</param>
-        /// <returns>The updated list of entities.</returns>
-        Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
-            Func<IQueryable<TEntity>, IQueryable<TEntity>> source,
-            IEnumerable<TEntity> newEntities,
-            bool useTransaction = false);
-
-        /// <summary>
         /// Deletes a given entity.
         /// </summary>
         /// <param name="entity">The entity to delete.</param>
@@ -171,6 +144,35 @@ namespace Smartive.Core.Database.Repositories
         /// <param name="id">The keys to delete.</param>
         /// <returns>A task that resolves to the entities when the elements are deleted.</returns>
         Task<IList<TEntity>> DeleteById(IEnumerable<TKey> id);
+
+        /// <summary>
+        /// Synchronizes a given list of entities (defined by the <paramref name="source"/> query)
+        /// with a given list of entities. This means, that the query is executed, then all entities
+        /// that are in the source but not in the given list, are deleted. All other elements are
+        /// created or updated according to their `Id` field.
+        /// </summary>
+        /// <param name="source">The source query for the synchronization.</param>
+        /// <param name="newEntities">The "master" list that will overwrite the source.</param>
+        /// <returns>The updated list of entities.</returns>
+        Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+            IQueryable<TEntity> source,
+            IEnumerable<TEntity> newEntities);
+
+        /// <summary>
+        /// Synchronizes a given list of entities (defined by the <paramref name="source"/>)
+        /// with a given list of entities. This means, that the query is executed, then all entities
+        /// that are in the source but not in the given list, are deleted. All other elements are
+        /// created or updated according to their `Id` field.
+        /// </summary>
+        /// <param name="source">
+        /// A function that receives the whole collection as <see cref="IQueryable{T}"/>
+        /// and should return a <see cref="IQueryable{T}"/> that is executed.
+        /// </param>
+        /// <param name="newEntities">The "master" list that will overwrite the source.</param>
+        /// <returns>The updated list of entities.</returns>
+        Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> source,
+            IEnumerable<TEntity> newEntities);
     }
 
     /// <inheritdoc />
