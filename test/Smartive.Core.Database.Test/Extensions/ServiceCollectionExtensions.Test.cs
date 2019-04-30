@@ -15,7 +15,7 @@ namespace Smartive.Core.Database.Test.Extensions
             var collection = new ServiceCollection();
             collection.Count.Should().Be(0);
 
-            collection.AddRepository<Author, TestDataContext>();
+            collection.AddRepository<Author, TestDataContext>(ServiceLifetime.Scoped);
 
             collection.Count.Should().Be(1);
             collection[0].Lifetime.Should().Be(ServiceLifetime.Scoped);
@@ -28,7 +28,7 @@ namespace Smartive.Core.Database.Test.Extensions
             var collection = new ServiceCollection();
             collection.Count.Should().Be(0);
 
-            collection.AddRepository<Author, TestDataContext>(ServiceLifetime.Transient);
+            collection.AddRepository<Author, TestDataContext>();
 
             collection.Count.Should().Be(1);
             collection[0].Lifetime.Should().Be(ServiceLifetime.Transient);
