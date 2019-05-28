@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Smartive.Core.Database.Attributes;
 using Smartive.Core.Database.Models;
 
 namespace Smartive.Core.Database.Repositories
@@ -357,10 +358,22 @@ namespace Smartive.Core.Database.Repositories
             if (IsTracked(entity, out var tracked))
             {
                 Context.Entry(tracked).CurrentValues.SetValues(entity);
+                SetIgnoredOnUpdate(tracked);
             }
             else
             {
                 Entities.Update(entity);
+                SetIgnoredOnUpdate(entity);
+            }
+        }
+
+        private void SetIgnoredOnUpdate(TEntity entity)
+        {
+            foreach (var property in entity.GetType()
+                .GetProperties()
+                .Where(p => Attribute.IsDefined(p, typeof(IgnoreOnUpdateAttribute))))
+            {
+                Context.Entry(entity).Property(property.Name).IsModified = false;
             }
         }
     }
