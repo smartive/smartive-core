@@ -15,7 +15,7 @@ namespace Smartive.Core.Database.Repositories
     /// <typeparam name="TEntity">Type of the entity.</typeparam>
     public interface ICrudRepository<TKey, TEntity>
         where TKey : notnull
-        where TEntity : Base<TKey>
+        where TEntity : notnull, Base<TKey>
     {
         /// <summary>
         /// Returns the whole list of entities as a queryable.
@@ -148,7 +148,7 @@ namespace Smartive.Core.Database.Repositories
 
     /// <inheritdoc />
     public interface ICrudRepository<TEntity> : ICrudRepository<int, TEntity>
-        where TEntity : Base
+        where TEntity : notnull, Base
     {
     }
 

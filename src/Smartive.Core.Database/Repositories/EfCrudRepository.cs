@@ -20,8 +20,8 @@ namespace Smartive.Core.Database.Repositories
     /// <typeparam name="TContext">Type of the database context.</typeparam>
     public class EfCrudRepository<TKey, TEntity, TContext> : ICrudRepository<TKey, TEntity>
         where TKey : notnull
-        where TEntity : Base<TKey>
-        where TContext : DbContext
+        where TEntity : notnull, Base<TKey>
+        where TContext : notnull, DbContext
     {
         /// <summary>
         /// Create an instance of the repository. Provides basic functionality.
@@ -49,11 +49,11 @@ namespace Smartive.Core.Database.Repositories
         public virtual async Task<IList<TEntity>> GetAll() => await AsQueryable().ToListAsync();
 
         /// <inheritdoc />
-        public virtual async Task<TEntity?> GetById([NotNull] TKey id) =>
+        public virtual async Task<TEntity?> GetById(TKey id) =>
             await AsQueryable().SingleOrDefaultAsync(e => e.Id.Equals(id));
 
         /// <inheritdoc />
-        public virtual async Task<TEntity> Create([NotNull] TEntity entity)
+        public virtual async Task<TEntity> Create(TEntity entity)
         {
             if (entity == null)
             {
@@ -66,7 +66,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public virtual async Task<IList<TEntity>> Create([NotNull] IEnumerable<TEntity> entities)
+        public virtual async Task<IList<TEntity>> Create(IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -85,7 +85,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public virtual async Task<TEntity> Update([NotNull] TEntity entity)
+        public virtual async Task<TEntity> Update(TEntity entity)
         {
             if (entity == null)
             {
@@ -99,7 +99,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public virtual async Task<IList<TEntity>> Update([NotNull] IEnumerable<TEntity> entities)
+        public virtual async Task<IList<TEntity>> Update(IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -122,7 +122,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public virtual async Task<TEntity> Save([NotNull] TEntity entity)
+        public virtual async Task<TEntity> Save(TEntity entity)
         {
             if (entity == null)
             {
@@ -135,7 +135,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public virtual async Task<IList<TEntity>> Save([NotNull] IEnumerable<TEntity> entities)
+        public virtual async Task<IList<TEntity>> Save(IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -152,7 +152,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<TEntity?> Delete([NotNull] TEntity entity)
+        public async Task<TEntity?> Delete(TEntity entity)
         {
             if (entity == null)
             {
@@ -170,7 +170,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<IList<TEntity>> Delete([NotNull] IEnumerable<TEntity> entities)
+        public async Task<IList<TEntity>> Delete(IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -210,7 +210,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<IList<TEntity>> DeleteById([NotNull] IEnumerable<TKey> ids)
+        public async Task<IList<TEntity>> DeleteById(IEnumerable<TKey> ids)
         {
             if (ids == null)
             {
@@ -286,7 +286,7 @@ namespace Smartive.Core.Database.Repositories
         /// </summary>
         /// <param name="entity">Entity to check.</param>
         /// <returns>True if an entity with the given id is found, false otherwise.</returns>
-        protected async Task<bool> ExistsInDatabase([NotNull] TEntity entity)
+        protected async Task<bool> ExistsInDatabase(TEntity entity)
         {
             if (EqualityComparer<TKey>.Default.Equals(entity.Id, default !))
             {
@@ -304,7 +304,7 @@ namespace Smartive.Core.Database.Repositories
         /// <param name="entity">The entity in question.</param>
         /// <param name="trackedEntity">The tracked entity instance.</param>
         /// <returns>True if the entity is already tracked, false otherwise.</returns>
-        protected bool IsTracked([NotNull] TEntity entity, out TEntity trackedEntity)
+        protected bool IsTracked(TEntity entity, out TEntity trackedEntity)
         {
             trackedEntity = Entities.Local.SingleOrDefault(
                 localEntity =>
@@ -340,7 +340,7 @@ namespace Smartive.Core.Database.Repositories
     /// <inheritdoc cref="EfCrudRepository{TKey,TEntity,TContext}" />
     public class EfCrudRepository<TEntity, TContext> : EfCrudRepository<int, TEntity, TContext>,
         ICrudRepository<TEntity>
-        where TEntity : Base
+        where TEntity : notnull, Base
         where TContext : DbContext
     {
         /// <summary>
@@ -355,7 +355,7 @@ namespace Smartive.Core.Database.Repositories
 
     /// <inheritdoc />
     public class EfCrudRepository<TEntity> : EfCrudRepository<TEntity, DbContext>
-        where TEntity : Base
+        where TEntity : notnull, Base
     {
         /// <summary>
         /// Create an instance of the repository. Provides basic functionality.
