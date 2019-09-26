@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Smartive.Core.Database.Attributes;
 using Smartive.Core.Database.Models;
 
@@ -19,6 +19,7 @@ namespace Smartive.Core.Database.Repositories
     /// <typeparam name="TEntity">Type of the entity.</typeparam>
     /// <typeparam name="TContext">Type of the database context.</typeparam>
     public class EfCrudRepository<TKey, TEntity, TContext> : ICrudRepository<TKey, TEntity>
+        where TKey : notnull
         where TEntity : Base<TKey>
         where TContext : DbContext
     {
@@ -42,51 +43,17 @@ namespace Smartive.Core.Database.Repositories
         protected DbSet<TEntity> Entities => Context.Set<TEntity>();
 
         /// <inheritdoc />
-        public async Task<IDbContextTransaction> Transaction() =>
-            Context.Database.CurrentTransaction ?? await Context.Database.BeginTransactionAsync();
+        public virtual IQueryable<TEntity> AsQueryable() => Entities.AsQueryable();
 
         /// <inheritdoc />
-        public virtual IQueryable<TEntity> AsQueryable()
-        {
-            return Entities.AsQueryable();
-        }
+        public virtual async Task<IList<TEntity>> GetAll() => await AsQueryable().ToListAsync();
 
         /// <inheritdoc />
-        public async Task<IList<TResult>> Query<TResult>(Func<IQueryable<TEntity>, IQueryable<TResult>> query)
-        {
-            if (query == null)
-            {
-                throw new ArgumentNullException(nameof(query));
-            }
-
-            return await query(AsQueryable()).ToListAsync();
-        }
+        public virtual async Task<TEntity?> GetById([NotNull] TKey id) =>
+            await AsQueryable().SingleOrDefaultAsync(e => e.Id.Equals(id));
 
         /// <inheritdoc />
-        public async Task<TResult> QuerySingle<TResult>(Func<IQueryable<TEntity>, IQueryable<TResult>> query)
-        {
-            if (query == null)
-            {
-                throw new ArgumentNullException(nameof(query));
-            }
-
-            return await query(AsQueryable()).SingleOrDefaultAsync();
-        }
-
-        /// <inheritdoc />
-        public virtual async Task<IList<TEntity>> GetAll()
-        {
-            return await Entities.ToListAsync();
-        }
-
-        /// <inheritdoc />
-        public virtual Task<TEntity> GetById(TKey id)
-        {
-            return Entities.SingleOrDefaultAsync(e => e.Id.Equals(id));
-        }
-
-        /// <inheritdoc />
-        public virtual async Task<TEntity> Create(TEntity entity)
+        public virtual async Task<TEntity> Create([NotNull] TEntity entity)
         {
             if (entity == null)
             {
@@ -99,7 +66,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public virtual async Task<IList<TEntity>> Create(IEnumerable<TEntity> entities)
+        public virtual async Task<IList<TEntity>> Create([NotNull] IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -107,7 +74,7 @@ namespace Smartive.Core.Database.Repositories
             }
 
             var enumerable = entities.ToList();
-            if (enumerable.Count <= 0)
+            if (!enumerable.Any())
             {
                 return enumerable;
             }
@@ -118,7 +85,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public virtual async Task<TEntity> Update(TEntity entity)
+        public virtual async Task<TEntity> Update([NotNull] TEntity entity)
         {
             if (entity == null)
             {
@@ -132,7 +99,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public virtual async Task<IList<TEntity>> Update(IEnumerable<TEntity> entities)
+        public virtual async Task<IList<TEntity>> Update([NotNull] IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -140,7 +107,7 @@ namespace Smartive.Core.Database.Repositories
             }
 
             var enumerable = entities.ToList();
-            if (enumerable.Count <= 0)
+            if (!enumerable.Any())
             {
                 return enumerable;
             }
@@ -155,7 +122,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public virtual async Task<TEntity> Save(TEntity entity)
+        public virtual async Task<TEntity> Save([NotNull] TEntity entity)
         {
             if (entity == null)
             {
@@ -168,7 +135,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public virtual async Task<IList<TEntity>> Save(IEnumerable<TEntity> entities)
+        public virtual async Task<IList<TEntity>> Save([NotNull] IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -185,7 +152,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<TEntity> Delete(TEntity entity)
+        public async Task<TEntity?> Delete([NotNull] TEntity entity)
         {
             if (entity == null)
             {
@@ -203,7 +170,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<IList<TEntity>> Delete(IEnumerable<TEntity> entities)
+        public async Task<IList<TEntity>> Delete([NotNull] IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -211,21 +178,25 @@ namespace Smartive.Core.Database.Repositories
             }
 
             var enumerable = entities.ToList();
-            if (enumerable.Count <= 0)
+            if (!enumerable.Any())
             {
                 return enumerable;
             }
 
+            var result = new List<TEntity>();
             foreach (var entity in enumerable)
             {
-                await Delete(entity);
+                if (await Delete(entity) != null)
+                {
+                    result.Add(entity);
+                }
             }
 
-            return enumerable;
+            return result;
         }
 
         /// <inheritdoc />
-        public virtual async Task<TEntity> DeleteById(TKey id)
+        public virtual async Task<TEntity?> DeleteById(TKey id)
         {
             var entity = await GetById(id);
             if (entity == null)
@@ -239,7 +210,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<IList<TEntity>> DeleteById(IEnumerable<TKey> ids)
+        public async Task<IList<TEntity>> DeleteById([NotNull] IEnumerable<TKey> ids)
         {
             if (ids == null)
             {
@@ -248,14 +219,18 @@ namespace Smartive.Core.Database.Repositories
 
             var enumerable = ids.ToList();
             var entities = new List<TEntity>();
-            if (enumerable.Count <= 0)
+            if (!enumerable.Any())
             {
                 return new List<TEntity>();
             }
 
             foreach (var entity in enumerable)
             {
-                entities.Add(await DeleteById(entity));
+                var deleted = await DeleteById(entity);
+                if (deleted != null)
+                {
+                    entities.Add(deleted);
+                }
             }
 
             return entities;
@@ -263,11 +238,11 @@ namespace Smartive.Core.Database.Repositories
 
         /// <inheritdoc />
         public async Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
-            IQueryable<TEntity> source,
+            IQueryable<TEntity> sourceList,
             IEnumerable<TEntity> newEntities)
         {
             var newList = newEntities.ToList();
-            var entities = await source.ToListAsync();
+            var entities = await sourceList.ToListAsync();
 
             var addEntities = new List<TEntity>();
             var editEntities = new List<TEntity>();
@@ -292,16 +267,16 @@ namespace Smartive.Core.Database.Repositories
             {
                 Added = await Create(addEntities),
                 Updated = await Update(editEntities),
-                Removed = await Delete(oldEntities)
+                Removed = await Delete(oldEntities),
             };
         }
 
         /// <inheritdoc />
         public Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
-            Func<IQueryable<TEntity>, IQueryable<TEntity>> source,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> sourceList,
             IEnumerable<TEntity> newEntities)
         {
-            return SynchronizeCollection(source(AsQueryable()), newEntities);
+            return SynchronizeCollection(sourceList(AsQueryable()), newEntities);
         }
 
         /// <summary>
@@ -311,9 +286,9 @@ namespace Smartive.Core.Database.Repositories
         /// </summary>
         /// <param name="entity">Entity to check.</param>
         /// <returns>True if an entity with the given id is found, false otherwise.</returns>
-        protected async Task<bool> ExistsInDatabase(TEntity entity)
+        protected async Task<bool> ExistsInDatabase([NotNull] TEntity entity)
         {
-            if (EqualityComparer<TKey>.Default.Equals(entity.Id, default))
+            if (EqualityComparer<TKey>.Default.Equals(entity.Id, default !))
             {
                 return false;
             }
@@ -329,28 +304,12 @@ namespace Smartive.Core.Database.Repositories
         /// <param name="entity">The entity in question.</param>
         /// <param name="trackedEntity">The tracked entity instance.</param>
         /// <returns>True if the entity is already tracked, false otherwise.</returns>
-        protected bool IsTracked(TEntity entity, out TEntity trackedEntity)
+        protected bool IsTracked([NotNull] TEntity entity, out TEntity trackedEntity)
         {
             trackedEntity = Entities.Local.SingleOrDefault(
                 localEntity =>
                     localEntity == entity || EqualityComparer<TKey>.Default.Equals(localEntity.Id, entity.Id));
             return trackedEntity != null;
-        }
-
-        /// <summary>
-        /// Executes an action (or therefore multiple things) in a transaction.
-        /// </summary>
-        /// <param name="action">The action that should be performed.</param>
-        /// <typeparam name="TResult">Type of the result.</typeparam>
-        /// <returns>A task that resolves to the result.</returns>
-        protected async Task<TResult> ExecuteTransactional<TResult>(Func<Task<TResult>> action)
-        {
-            using (var transaction = await Transaction())
-            {
-                var result = await action();
-                transaction.Commit();
-                return result;
-            }
         }
 
         private void UpdateEntity(TEntity entity)

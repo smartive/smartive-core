@@ -57,9 +57,7 @@ namespace Smartive.Core.Wpf.ViewModels
         /// Event method to notify a property as changed.
         /// </summary>
         /// <param name="propertyName">Name of the property (compiler guessed)</param>
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = default)
-        {
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = default) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }
