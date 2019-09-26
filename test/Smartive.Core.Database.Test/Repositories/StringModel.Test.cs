@@ -88,59 +88,6 @@ namespace Smartive.Core.Database.Test.Repositories
             user.Name.Should().Be("NewUser1");
         }
 
-        [Fact]
-        public async Task Test_Get_User_With_Items()
-        {
-            await InsertDemoData();
-            DetachData();
-
-            var user = await _users.QuerySingle(users => users.Where(u => u.Id == "user1").Include(u => u.UserItems));
-            user.Name.Should().Be("User1");
-            user.UserItems.Should().NotBeNull();
-        }
-
-        [Fact]
-        public async Task Test_Update_User_With_Items_List()
-        {
-            await InsertDemoData();
-            DetachData();
-
-            var user = await _users.QuerySingle(users => users.Where(u => u.Id == "user1").Include(u => u.UserItems));
-            user.Name.Should().Be("User1");
-            user.UserItems.Should().NotBeNull();
-
-            user.Name = "NewUserName";
-
-            await _users.Save(user);
-
-            DetachData();
-
-            user = await _users.QuerySingle(users => users.Where(u => u.Id == "user1").Include(u => u.UserItems));
-            user.Name.Should().Be("NewUserName");
-            user.UserItems.Should().NotBeNull();
-        }
-
-        [Fact]
-        public async Task Test_Update_Included_Data()
-        {
-            await InsertDemoData();
-            DetachData();
-
-            var user = await _users.QuerySingle(users => users.Where(u => u.Id == "user1").Include(u => u.UserItems));
-            user.Name.Should().Be("User1");
-            user.UserItems[0].Name.Should().Be("Useritem 1");
-
-            user.UserItems[0].Name = "YOLO";
-
-            await _users.Save(user);
-
-            DetachData();
-
-            user = await _users.QuerySingle(users => users.Where(u => u.Id == "user1").Include(u => u.UserItems));
-            user.Name.Should().Be("User1");
-            user.UserItems[0].Name.Should().Be("YOLO");
-        }
-
         private async Task InsertDemoData()
         {
             await _users.Create(
