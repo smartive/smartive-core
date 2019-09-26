@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;netcoreapp2.1;netcoreapp2.2</TargetFrameworks>
-        <LangVersion>latest</LangVersion>
+        <TargetFrameworks>netstandard2.1</TargetFrameworks>
+        <LangVersion>8</LangVersion>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\Smartive.Core.Database\Smartive.Core.Database.csproj" />
-        <ProjectReference Include="..\Smartive.Core.Debug\Smartive.Core.Debug.csproj" />
         <ProjectReference Include="..\Smartive.Core.Wpf\Smartive.Core.Wpf.csproj" />
     </ItemGroup>
 </Project>

@@ -6,7 +6,7 @@ using Smartive.Core.Database.Repositories;
 namespace Smartive.Core.Database.Extensions
 {
     /// <summary>
-    /// Contains extension methods for the service collection to add auto repositories
+    /// Contains extension methods for the service collection to add auto repositories.
     /// </summary>
     public static class ServiceCollectionExtensions
     {
@@ -15,10 +15,10 @@ namespace Smartive.Core.Database.Extensions
         /// is registered with the type <see cref="ICrudRepository{TEntity}"/>.
         /// </summary>
         /// <param name="collection">The <see cref="IServiceCollection"/> that should register.</param>
-        /// <param name="lifetime">ServiceLifetime</param>
+        /// <param name="lifetime">ServiceLifetime.</param>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <typeparam name="TContext">The type of the db context.</typeparam>
-        /// <returns>The <see cref="IServiceCollection"/> for chaining</returns>
+        /// <returns>The <see cref="IServiceCollection"/> for chaining.</returns>
         public static IServiceCollection AddRepository<TEntity, TContext>(
             this IServiceCollection collection,
             ServiceLifetime lifetime = ServiceLifetime.Transient)
@@ -30,7 +30,6 @@ namespace Smartive.Core.Database.Extensions
                     typeof(ICrudRepository<TEntity>),
                     provider => new EfCrudRepository<TEntity, TContext>(provider.GetService<TContext>()),
                     lifetime));
-            ModelExtensions.ModelRepositories[typeof(TEntity)] = typeof(ICrudRepository<TEntity>);
 
             return collection;
         }
@@ -40,14 +39,15 @@ namespace Smartive.Core.Database.Extensions
         /// is registered with the type <see cref="ICrudRepository{TKey,TEntity}"/>.
         /// </summary>
         /// <param name="collection">The <see cref="IServiceCollection"/> that should register.</param>
-        /// <param name="lifetime">ServiceLifetime</param>
+        /// <param name="lifetime">ServiceLifetime.</param>
         /// <typeparam name="TKey">The type of the entity id.</typeparam>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <typeparam name="TContext">The type of the db context.</typeparam>
-        /// <returns>The <see cref="IServiceCollection"/> for chaining</returns>
+        /// <returns>The <see cref="IServiceCollection"/> for chaining.</returns>
         public static IServiceCollection AddRepository<TKey, TEntity, TContext>(
             this IServiceCollection collection,
             ServiceLifetime lifetime = ServiceLifetime.Transient)
+            where TKey : notnull
             where TEntity : Base<TKey>
             where TContext : DbContext
         {
@@ -56,7 +56,6 @@ namespace Smartive.Core.Database.Extensions
                     typeof(ICrudRepository<TKey, TEntity>),
                     provider => new EfCrudRepository<TKey, TEntity, TContext>(provider.GetService<TContext>()),
                     lifetime));
-            ModelExtensions.ModelRepositories[typeof(TEntity)] = typeof(ICrudRepository<TKey, TEntity>);
 
             return collection;
         }
@@ -83,7 +82,6 @@ namespace Smartive.Core.Database.Extensions
                     typeof(TRepository),
                     typeof(TRepository),
                     lifetime));
-            ModelExtensions.ModelRepositories[typeof(TEntity)] = typeof(TRepository);
 
             return collection;
         }
@@ -103,6 +101,7 @@ namespace Smartive.Core.Database.Extensions
         public static IServiceCollection AddCustomRepository<TKey, TEntity, TRepository>(
             this IServiceCollection collection,
             ServiceLifetime lifetime = ServiceLifetime.Transient)
+            where TKey : notnull
             where TEntity : Base<TKey>
             where TRepository : ICrudRepository<TKey, TEntity>
         {
@@ -111,7 +110,6 @@ namespace Smartive.Core.Database.Extensions
                     typeof(TRepository),
                     typeof(TRepository),
                     lifetime));
-            ModelExtensions.ModelRepositories[typeof(TEntity)] = typeof(TRepository);
 
             return collection;
         }

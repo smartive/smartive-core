@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using DefaultNamespace;
 using Nuke.Common;
-using Nuke.Common.BuildServers;
+using Nuke.Common.CI.GitLab;
 using Nuke.Common.Execution;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
@@ -35,7 +35,7 @@ public class Build : NukeBuild
     [Parameter("Version that is built. Needed for packaging. (format: x.x.x)")]
     readonly string Version = GitLab.Instance?.CommitTag?.Substring(1);
 
-    readonly string NugetKey = EnvironmentInfo.Variable("NUGET_KEY");
+    readonly string NugetKey = Environment.GetEnvironmentVariable("NUGET_KEY");
 
     [Solution] readonly Solution Solution;
 

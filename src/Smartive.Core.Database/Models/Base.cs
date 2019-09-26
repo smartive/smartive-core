@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Smartive.Core.Database.Models
 {
@@ -9,17 +10,19 @@ namespace Smartive.Core.Database.Models
     /// </summary>
     /// <typeparam name="TKey">The type of the id property.</typeparam>
     public abstract class Base<TKey>
+        where TKey : notnull
     {
         /// <summary>
         /// Gets or sets the id property. The type is defined by TKey.
         /// </summary>
         [Key]
-        public TKey Id { get; set; }
+        [NotNull]
+        public TKey Id { get; set; } = default(TKey) !;
     }
 
     /// <inheritdoc />
     /// <summary>
-    /// Default basic model class which an `int` Id (TKey)
+    /// Default basic model class which an `int` Id (TKey).
     /// </summary>
     public abstract class Base : Base<int>
     {

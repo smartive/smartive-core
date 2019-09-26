@@ -19,11 +19,6 @@ Contains various helpers and repository files for entity framework core.
 There is a repository pattern that adds some functionality to fast prototype repositories
 with default crud operations.
 
-### Smartive.Core.Debug
-
-Small debug library for asp.net core applications. Adds various debugging routes and
-helpers to debug a web application.
-
 ### Smartive.Core.Wpf
 
 Extensions for wpf applications (like xamarin forms).

@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;netcoreapp2.1;netcoreapp2.2</TargetFrameworks>
-        <LangVersion>latest</LangVersion>
+        <TargetFrameworks>netstandard2.1</TargetFrameworks>
+        <LangVersion>8</LangVersion>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference PrivateAssets="All" Include="StyleCop.Analyzers" Version="1.0.2" />
+        <PackageReference PrivateAssets="All" Include="StyleCop.Analyzers" Version="1.1.118" />
         <AdditionalFiles Include="../../stylecop.json" />
     </ItemGroup>
 

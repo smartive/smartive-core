@@ -9,6 +9,7 @@ namespace Smartive.Core.Database.Models
     /// <typeparam name="TKey">Key type of the entity.</typeparam>
     /// <typeparam name="TEntity">Entity type.</typeparam>
     public class SynchronizationResult<TKey, TEntity>
+        where TKey : notnull
         where TEntity : Base<TKey>
     {
         /// <summary>
