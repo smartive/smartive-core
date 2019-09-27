@@ -14,11 +14,7 @@ test:
   stage: test
   extends: .base
   script:
-    - ./build.sh --target CoverageReport
-  coverage: '/\s*Line coverage:\s([\d\.]+)%/'
-  artifacts:
-    paths:
-      - coverage/
+    - ./build.sh --target Test
   except:
     - tags
 

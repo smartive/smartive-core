@@ -1,16 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using DefaultNamespace;
 using Nuke.Common;
 using Nuke.Common.CI.GitLab;
 using Nuke.Common.Execution;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
-using Nuke.Common.Tools.Coverlet;
 using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.ReportGenerator;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
@@ -39,13 +35,6 @@ public class Build : NukeBuild
 
     [Solution] readonly Solution Solution;
 
-    IReadOnlyList<DotNetTool> _tools = new[]
-    {
-        new DotNetTool { PackageName = "coverlet.console", Executable = "coverlet", Version = "1.5.0" },
-        new DotNetTool
-            { PackageName = "dotnet-reportgenerator-globaltool", Executable = "reportgenerator", Version = "4.0.15" }
-    };
-
     IEnumerable<Project> SourceProjects => Solution.AllProjects.Where(p => p.SolutionFolder?.Name == "src");
     IEnumerable<Project> TestProjects => Solution.AllProjects.Where(p => p.SolutionFolder?.Name == "test");
 
@@ -70,12 +59,6 @@ public class Build : NukeBuild
         {
             DotNetRestore(s => s
                 .SetProjectFile(Solution));
-
-            DotNetToolInstall(s => s
-                .SetToolInstallationPath(ToolsDirectory)
-                .CombineWith(_tools.Where(t => !FileExists(ToolsDirectory / t.Executable)), (ss, tool) => ss
-                    .SetVersion(tool.Version)
-                    .SetPackageName(tool.PackageName)), Environment.ProcessorCount);
         });
 
     Target Compile => _ => _
@@ -95,39 +78,11 @@ public class Build : NukeBuild
             Logger.Info("Cleanup coverage directory.");
             EnsureCleanDirectory(CoverageDirectory);
         })
-        .Executes(() =>
-        {
-            CoverletTasks.Coverlet(s => s
-                .SetFormat(CoverletOutputFormat.opencover)
-                .SetToolPath(ToolsDirectory / "coverlet")
-                .AddExclude("[xunit.*]*", "[*.Test]*")
-                .CombineWith(TestProjects, (ss, project) => ss
-                    .SetAssembly(project.Directory / $"bin/{Configuration}/{project.Name}.dll")
-                    .SetOutput(CoverageDirectory / $"cov-{project.Name}-{DateTime.UtcNow:dd-MM-yyyy-HH-mm-ss}.xml")
-                    .SetTargetSettings(new DotNetTestSettings()
-                        .EnableNoBuild()
-                        .SetProjectFile(project)
-                        .SetConfiguration(Configuration))), Environment.ProcessorCount);
-        });
-
-    Target CoverageReport => _ => _
-        .DependsOn(Test)
-        .OnlyWhenDynamic(() => DirectoryExists(CoverageDirectory))
-        .Executes(() =>
-        {
-            var reportDir = CoverageDirectory / "report";
-            EnsureCleanDirectory(reportDir);
-            ReportGeneratorTasks.ReportGenerator(s => s
-                .SetToolPath(ToolsDirectory / "reportgenerator")
-                .SetReportTypes(ReportTypes.Badges, ReportTypes.HtmlSummary, ReportTypes.TextSummary)
-                .SetReports(CoverageDirectory / "*.xml")
-                .SetTargetDirectory(reportDir));
-
-            using (Logger.Block("Coverage Report"))
-            {
-                Logger.Success(File.ReadAllText(CoverageDirectory / "report" / "Summary.txt"));
-            }
-        });
+        .Executes(() => DotNetTest(s => s
+            .SetConfiguration(Configuration)
+            .EnableNoBuild()
+            .CombineWith(TestProjects, (ss, p) => ss
+                .SetProjectFile(p))));
 
     Target Pack => _ => _
         .DependsOn(Clean, Compile)
