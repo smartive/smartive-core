@@ -144,6 +144,17 @@ namespace Smartive.Core.Database.Repositories
         Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             Func<IQueryable<TEntity>, IQueryable<TEntity>> sourceList,
             IEnumerable<TEntity> newEntities);
+
+        /// <summary>
+        /// Synchronizes all items in this entity repository (uses GetAll())
+        /// with a given list of entities. This means, that the query is executed, then all entities
+        /// that are in the source but not in the given list, are deleted. All other elements are
+        /// created or updated according to their `Id` field.
+        /// </summary>
+        /// <param name="newEntities">The "master" list that will overwrite the source.</param>
+        /// <returns>The updated list of entities.</returns>
+        Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+            IEnumerable<TEntity> newEntities);
     }
 
     /// <inheritdoc />

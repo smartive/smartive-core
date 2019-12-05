@@ -432,8 +432,9 @@ namespace Smartive.Core.Database.Test.Repositories
             await InsertDemoData();
             await _authors.Save(new[] { new Author { Name = "A4" }, new Author { Name = "A5" } });
             var result = await _context.Authors.ToListAsync();
-            result.First(o => o.Id == 4).Name.Should().Be("A4");
-            result.First(o => o.Id == 5).Name.Should().Be("A5");
+            result.First(o => o.Id == 5).Name.Should().Be("A4");
+            // This is intended by ef core.. since the later object is a5, it will be inserted first. LIFO principle.
+            result.First(o => o.Id == 4).Name.Should().Be("A5");
         }
 
         [Fact]
