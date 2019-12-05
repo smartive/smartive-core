@@ -10,10 +10,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "etc", "etc", "{E5A71516-A7F
 ProjectSection(SolutionItems) = preProject
 	.gitlab-ci.yml = .gitlab-ci.yml
 	.gitignore = .gitignore
-	project.ruleset = project.ruleset
-	stylecop.json = stylecop.json
 	README.md = README.md
 	.releaserc.json = .releaserc.json
+	etc\CodeAnalysis.targets = etc\CodeAnalysis.targets
+	etc\Common.targets = etc\Common.targets
+	etc\project.ruleset = etc\project.ruleset
+	etc\stylecop.json = etc\stylecop.json
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smartive.Core.Wpf", "src\Smartive.Core.Wpf\Smartive.Core.Wpf.csproj", "{73504858-105D-4628-A7B6-A004ACEBFCF7}"

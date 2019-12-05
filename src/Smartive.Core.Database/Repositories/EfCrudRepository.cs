@@ -31,8 +31,6 @@ namespace Smartive.Core.Database.Repositories
             Context = context;
         }
 
-        private static EqualityComparer<TKey> KeyComparer => EqualityComparer<TKey>.Default;
-
         /// <summary>
         /// The given database context for this repository.
         /// </summary>
@@ -42,6 +40,8 @@ namespace Smartive.Core.Database.Repositories
         /// Entity-set of this repository.
         /// </summary>
         protected DbSet<TEntity> Entities => Context.Set<TEntity>();
+
+        private static EqualityComparer<TKey> KeyComparer => EqualityComparer<TKey>.Default;
 
         /// <inheritdoc />
         public virtual IQueryable<TEntity> AsQueryable() => Entities.AsQueryable();
@@ -313,6 +313,11 @@ namespace Smartive.Core.Database.Repositories
             {
                 if (IsTracked(entity, out var tracked))
                 {
+                    if (tracked == null)
+                    {
+                        continue;
+                    }
+
                     Context.Entry(tracked).CurrentValues.SetValues(entity);
                     SetIgnoredOnUpdate(tracked);
                 }
