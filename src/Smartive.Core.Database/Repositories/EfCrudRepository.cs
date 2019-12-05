@@ -288,12 +288,12 @@ namespace Smartive.Core.Database.Repositories
         /// <returns>True if an entity with the given id is found, false otherwise.</returns>
         protected async Task<bool> ExistsInDatabase(TEntity entity)
         {
-            if (EqualityComparer<TKey>.Default.Equals(entity.Id, default !))
+            if (EqualityComparer<TKey>.Default.Equals(entity.Id, default!))
             {
                 return false;
             }
 
-            return await Entities.AnyAsync(e => e.Id.Equals(entity.Id));
+            return IsTracked(entity, out _) || await Entities.AnyAsync(e => e.Id.Equals(entity.Id));
         }
 
         /// <summary>
