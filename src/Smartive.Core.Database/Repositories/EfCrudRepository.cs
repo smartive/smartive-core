@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +41,8 @@ namespace Smartive.Core.Database.Repositories
         /// </summary>
         protected DbSet<TEntity> Entities => Context.Set<TEntity>();
 
+        private static EqualityComparer<TKey> KeyComparer => EqualityComparer<TKey>.Default;
+
         /// <inheritdoc />
         public virtual IQueryable<TEntity> AsQueryable() => Entities.AsQueryable();
 
@@ -60,7 +61,7 @@ namespace Smartive.Core.Database.Repositories
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            await Entities.AddAsync(entity);
+            await CreateEntities(new[] { entity });
             await Context.SaveChangesAsync();
             return entity;
         }
@@ -79,7 +80,7 @@ namespace Smartive.Core.Database.Repositories
                 return enumerable;
             }
 
-            await Entities.AddRangeAsync(enumerable);
+            await CreateEntities(enumerable);
             await Context.SaveChangesAsync();
             return enumerable;
         }
@@ -92,8 +93,7 @@ namespace Smartive.Core.Database.Repositories
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            UpdateEntity(entity);
-
+            UpdateEntities(new[] { entity });
             await Context.SaveChangesAsync();
             return entity;
         }
@@ -112,11 +112,7 @@ namespace Smartive.Core.Database.Repositories
                 return enumerable;
             }
 
-            foreach (var entity in enumerable)
-            {
-                UpdateEntity(entity);
-            }
-
+            UpdateEntities(enumerable);
             await Context.SaveChangesAsync();
             return enumerable;
         }
@@ -129,9 +125,9 @@ namespace Smartive.Core.Database.Repositories
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            return await ExistsInDatabase(entity)
-                ? await Update(entity)
-                : await Create(entity);
+            await SaveEntities(new[] { entity });
+            await Context.SaveChangesAsync();
+            return entity;
         }
 
         /// <inheritdoc />
@@ -143,34 +139,27 @@ namespace Smartive.Core.Database.Repositories
             }
 
             var list = entities.ToList();
-            foreach (var entity in list)
-            {
-                await Save(entity);
-            }
-
+            await SaveEntities(list);
+            await Context.SaveChangesAsync();
             return list;
         }
 
         /// <inheritdoc />
-        public async Task<TEntity?> Delete(TEntity entity)
+        public virtual async Task<TEntity?> Delete(TEntity entity)
         {
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            if (!IsTracked(entity, out var trackedEntity))
-            {
-                return await DeleteById(entity.Id);
-            }
-
-            Entities.Remove(trackedEntity);
+            var deleted = await DeleteEntities(new[] { entity });
             await Context.SaveChangesAsync();
-            return trackedEntity;
+
+            return deleted.FirstOrDefault();
         }
 
         /// <inheritdoc />
-        public async Task<IList<TEntity>> Delete(IEnumerable<TEntity> entities)
+        public virtual async Task<IList<TEntity>> Delete(IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -183,34 +172,23 @@ namespace Smartive.Core.Database.Repositories
                 return enumerable;
             }
 
-            var result = new List<TEntity>();
-            foreach (var entity in enumerable)
-            {
-                if (await Delete(entity) != null)
-                {
-                    result.Add(entity);
-                }
-            }
+            var deleted = await DeleteEntities(enumerable);
+            await Context.SaveChangesAsync();
 
-            return result;
+            return deleted;
         }
 
         /// <inheritdoc />
         public virtual async Task<TEntity?> DeleteById(TKey id)
         {
-            var entity = await GetById(id);
-            if (entity == null)
-            {
-                return null;
-            }
-
-            Entities.Remove(entity);
+            var deleted = await DeleteEntities(new[] { id });
             await Context.SaveChangesAsync();
-            return entity;
+
+            return deleted.FirstOrDefault();
         }
 
         /// <inheritdoc />
-        public async Task<IList<TEntity>> DeleteById(IEnumerable<TKey> ids)
+        public virtual async Task<IList<TEntity>> DeleteById(IEnumerable<TKey> ids)
         {
             if (ids == null)
             {
@@ -218,26 +196,19 @@ namespace Smartive.Core.Database.Repositories
             }
 
             var enumerable = ids.ToList();
-            var entities = new List<TEntity>();
             if (!enumerable.Any())
             {
                 return new List<TEntity>();
             }
 
-            foreach (var entity in enumerable)
-            {
-                var deleted = await DeleteById(entity);
-                if (deleted != null)
-                {
-                    entities.Add(deleted);
-                }
-            }
+            var deleted = await DeleteEntities(enumerable);
+            await Context.SaveChangesAsync();
 
-            return entities;
+            return deleted;
         }
 
         /// <inheritdoc />
-        public async Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+        public virtual async Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             IQueryable<TEntity> sourceList,
             IEnumerable<TEntity> newEntities)
         {
@@ -259,25 +230,32 @@ namespace Smartive.Core.Database.Repositories
                 }
             }
 
-            var oldEntities = entities
-                .Where(entity => !newList.Any(newEntity => entity.Id.Equals(newEntity.Id)))
-                .ToList();
+            await CreateEntities(addEntities);
+            UpdateEntities(editEntities);
+            var oldEntities = await DeleteEntities(
+                entities
+                    .Where(entity => !newList.Any(newEntity => entity.Id.Equals(newEntity.Id))));
+
+            await Context.SaveChangesAsync();
 
             return new SynchronizationResult<TKey, TEntity>
             {
-                Added = await Create(addEntities),
-                Updated = await Update(editEntities),
-                Removed = await Delete(oldEntities),
+                Added = addEntities,
+                Updated = editEntities,
+                Removed = oldEntities,
             };
         }
 
         /// <inheritdoc />
-        public Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+        public virtual Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             Func<IQueryable<TEntity>, IQueryable<TEntity>> sourceList,
-            IEnumerable<TEntity> newEntities)
-        {
-            return SynchronizeCollection(sourceList(AsQueryable()), newEntities);
-        }
+            IEnumerable<TEntity> newEntities) =>
+            SynchronizeCollection(sourceList(AsQueryable()), newEntities);
+
+        /// <inheritdoc />
+        public virtual Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+            IEnumerable<TEntity> newEntities) =>
+            SynchronizeCollection(AsQueryable(), newEntities);
 
         /// <summary>
         /// Determines if an entity exists in the database context with the given id.
@@ -288,7 +266,12 @@ namespace Smartive.Core.Database.Repositories
         /// <returns>True if an entity with the given id is found, false otherwise.</returns>
         protected async Task<bool> ExistsInDatabase(TEntity entity)
         {
-            if (EqualityComparer<TKey>.Default.Equals(entity.Id, default !))
+            if (IsTracked(entity, out _))
+            {
+                return true;
+            }
+
+            if (KeyComparer.Equals(entity.Id, default!))
             {
                 return false;
             }
@@ -304,26 +287,96 @@ namespace Smartive.Core.Database.Repositories
         /// <param name="entity">The entity in question.</param>
         /// <param name="trackedEntity">The tracked entity instance.</param>
         /// <returns>True if the entity is already tracked, false otherwise.</returns>
-        protected bool IsTracked(TEntity entity, out TEntity trackedEntity)
+        protected bool IsTracked(TEntity entity, out TEntity? trackedEntity) => IsTracked(
+            localEntity => localEntity == entity || KeyComparer.Equals(localEntity.Id, entity.Id),
+            out trackedEntity);
+
+        /// <summary>
+        /// Determines if an entity is already tracked. Returns the tracked
+        /// entity as an out parameter. If it's not tracked,
+        /// the entity should be added before calling `SaveChangesAsync()`.
+        /// </summary>
+        /// <param name="predicate">The predicate to search for the entity.</param>
+        /// <param name="trackedEntity">The tracked entity instance.</param>
+        /// <returns>True if the entity is already tracked, false otherwise.</returns>
+        protected bool IsTracked(Func<TEntity, bool> predicate, out TEntity? trackedEntity)
         {
-            trackedEntity = Entities.Local.SingleOrDefault(
-                localEntity =>
-                    localEntity == entity || EqualityComparer<TKey>.Default.Equals(localEntity.Id, entity.Id));
+            trackedEntity = Entities.Local.SingleOrDefault(predicate);
             return trackedEntity != null;
         }
 
-        private void UpdateEntity(TEntity entity)
+        private Task CreateEntities(IEnumerable<TEntity> entities) => Entities.AddRangeAsync(entities);
+
+        private void UpdateEntities(IEnumerable<TEntity> entities)
         {
-            if (IsTracked(entity, out var tracked))
+            foreach (var entity in entities)
             {
-                Context.Entry(tracked).CurrentValues.SetValues(entity);
-                SetIgnoredOnUpdate(tracked);
+                if (IsTracked(entity, out var tracked))
+                {
+                    if (tracked == null)
+                    {
+                        continue;
+                    }
+
+                    Context.Entry(tracked).CurrentValues.SetValues(entity);
+                    SetIgnoredOnUpdate(tracked);
+                }
+                else
+                {
+                    Entities.Update(entity);
+                    SetIgnoredOnUpdate(entity);
+                }
             }
-            else
+        }
+
+        private async Task SaveEntities(IEnumerable<TEntity> entities)
+        {
+            var newEntities = new List<TEntity>();
+            var existingEntities = new List<TEntity>();
+
+            foreach (var entity in entities)
             {
-                Entities.Update(entity);
-                SetIgnoredOnUpdate(entity);
+                if (await ExistsInDatabase(entity))
+                {
+                    existingEntities.Add(entity);
+                }
+                else
+                {
+                    newEntities.Add(entity);
+                }
             }
+
+            await CreateEntities(newEntities);
+            UpdateEntities(existingEntities);
+        }
+
+        private Task<IList<TEntity>> DeleteEntities(IEnumerable<TEntity> entities) =>
+            DeleteEntities(entities.Select(e => e.Id));
+
+        private async Task<IList<TEntity>> DeleteEntities(IEnumerable<TKey> entityIds)
+        {
+            var deleted = new List<TEntity>();
+
+            foreach (var id in entityIds)
+            {
+                TEntity? entity;
+                if (IsTracked(e => KeyComparer.Equals(e.Id, id), out var trackedEntity))
+                {
+                    entity = trackedEntity;
+                }
+                else
+                {
+                    entity = await GetById(id);
+                }
+
+                if (entity != null)
+                {
+                    deleted.Add(entity);
+                    Entities.Remove(entity);
+                }
+            }
+
+            return deleted;
         }
 
         private void SetIgnoredOnUpdate(TEntity entity)

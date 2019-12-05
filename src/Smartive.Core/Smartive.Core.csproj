@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.1</TargetFrameworks>
-        <LangVersion>8</LangVersion>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <Nullable>enable</Nullable>
+        <TargetFramework>netstandard2.1</TargetFramework>
     </PropertyGroup>
+
+    <Import Project="../../etc/Common.targets"/>
+    <Import Project="../../etc/CodeAnalysis.targets"/>
+
     <ItemGroup>
-        <ProjectReference Include="..\Smartive.Core.Database\Smartive.Core.Database.csproj" />
-        <ProjectReference Include="..\Smartive.Core.Wpf\Smartive.Core.Wpf.csproj" />
+        <ProjectReference Include="..\Smartive.Core.Database\Smartive.Core.Database.csproj"/>
+        <ProjectReference Include="..\Smartive.Core.Wpf\Smartive.Core.Wpf.csproj"/>
     </ItemGroup>
 </Project>

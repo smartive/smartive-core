@@ -1,5 +1,7 @@
 include:
-  - 'https://gitlab.com/smartive/open-source/gitlab-ci-templates/raw/master/templates.yml'
+  - project: 'smartive/ci-templates'
+    ref: v1.1.1
+    file: '/all-templates.yml'
 
 image: mcr.microsoft.com/dotnet/core/sdk:3.0
 
@@ -21,10 +23,8 @@ test:
 # Release
 
 create release:
-  extends: .create-release
+  extends: .create-manual-release
   stage: release
-  dependencies: []
-  when: manual
   only:
     - master
 
