@@ -152,7 +152,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<TEntity?> Delete(TEntity entity)
+        public virtual async Task<TEntity?> Delete(TEntity entity)
         {
             if (entity == null)
             {
@@ -170,7 +170,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<IList<TEntity>> Delete(IEnumerable<TEntity> entities)
+        public virtual async Task<IList<TEntity>> Delete(IEnumerable<TEntity> entities)
         {
             if (entities == null)
             {
@@ -210,7 +210,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<IList<TEntity>> DeleteById(IEnumerable<TKey> ids)
+        public virtual async Task<IList<TEntity>> DeleteById(IEnumerable<TKey> ids)
         {
             if (ids == null)
             {
@@ -237,7 +237,7 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+        public virtual async Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             IQueryable<TEntity> sourceList,
             IEnumerable<TEntity> newEntities)
         {
@@ -272,12 +272,10 @@ namespace Smartive.Core.Database.Repositories
         }
 
         /// <inheritdoc />
-        public Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
+        public virtual Task<SynchronizationResult<TKey, TEntity>> SynchronizeCollection(
             Func<IQueryable<TEntity>, IQueryable<TEntity>> sourceList,
-            IEnumerable<TEntity> newEntities)
-        {
-            return SynchronizeCollection(sourceList(AsQueryable()), newEntities);
-        }
+            IEnumerable<TEntity> newEntities) =>
+            SynchronizeCollection(sourceList(AsQueryable()), newEntities);
 
         /// <summary>
         /// Determines if an entity exists in the database context with the given id.
@@ -288,12 +286,17 @@ namespace Smartive.Core.Database.Repositories
         /// <returns>True if an entity with the given id is found, false otherwise.</returns>
         protected async Task<bool> ExistsInDatabase(TEntity entity)
         {
+            if (IsTracked(entity, out _))
+            {
+                return true;
+            }
+
             if (EqualityComparer<TKey>.Default.Equals(entity.Id, default!))
             {
                 return false;
             }
 
-            return IsTracked(entity, out _) || await Entities.AnyAsync(e => e.Id.Equals(entity.Id));
+            return await Entities.AnyAsync(e => e.Id.Equals(entity.Id));
         }
 
         /// <summary>
