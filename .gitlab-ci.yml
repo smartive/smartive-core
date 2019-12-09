@@ -18,15 +18,10 @@ test:
   before_script:
     - apt-get install -y curl
     - |
-      curl -u smartive-ci:$GH_TOKEN \
+      echo curl -u smartive-ci:$GH_TOKEN \
         -X POST https://api.github.com/repos/smartive/smartive-core/statuses/$CI_COMMIT_SHA \
         -H 'Content-Type: application/json' \
-        -d '{
-              "state": "pending",
-              "target_url": "URL",
-              "description": "asdf",
-              "context": "asdf"
-            }'
+        -d "{ \"state\": \"pending\", \"target_url\": \"URL\", \"description\": \"asdf\", \"context\": \"asdf\"}"
   script:
     - ./build.sh --target Test
   except:
