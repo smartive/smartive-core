@@ -7,6 +7,7 @@ image: mcr.microsoft.com/dotnet/core/sdk:3.0
 
 stages:
   - test
+  - test_report
   - release
   - deploy
 
@@ -16,14 +17,42 @@ test:
   stage: test
   extends: .base
   before_script:
-    - apt-get install -y curl
     - |
       curl -u smartive-ci:$GH_TOKEN \
         -X POST https://api.github.com/repos/smartive/smartive-core/statuses/$CI_COMMIT_SHA \
         -H 'Content-Type: application/json' \
-        -d "{ \"state\": \"pending\", \"target_url\": \"$CI_JOB_URL\", \"description\": \"CI Test Build\", \"context\": \"$CI_JOB_NAME/$CI_JOB_ID\"}"
+        -d "{ \"state\": \"pending\", \"target_url\": \"$CI_JOB_URL\", \"description\": \"CI Test Build\", \"context\": \"$CI_PROJECT_PATH_SLUG/$CI_PIPELINE_IID\"}" \
+      > /dev/null
   script:
     - ./build.sh --target Test
+  except:
+    - tags
+
+test success:
+  stage: test_report
+  extends: .base
+  script:
+    - |
+      curl -u smartive-ci:$GH_TOKEN \
+        -X POST https://api.github.com/repos/smartive/smartive-core/statuses/$CI_COMMIT_SHA \
+        -H 'Content-Type: application/json' \
+        -d "{ \"state\": \"success\", \"target_url\": \"$CI_JOB_URL\", \"description\": \"CI Test Build\", \"context\": \"$CI_PROJECT_PATH_SLUG/$CI_PIPELINE_IID\"}" \
+      > /dev/null
+  when: on_success
+  except:
+    - tags
+
+test failure:
+  stage: test_report
+  extends: .base
+  script:
+    - |
+      curl -u smartive-ci:$GH_TOKEN \
+        -X POST https://api.github.com/repos/smartive/smartive-core/statuses/$CI_COMMIT_SHA \
+        -H 'Content-Type: application/json' \
+        -d "{ \"state\": \"failure\", \"target_url\": \"$CI_JOB_URL\", \"description\": \"CI Test Build\", \"context\": \"$CI_PROJECT_PATH_SLUG/$CI_PIPELINE_IID\"}" \
+      > /dev/null
+  when: on_failure
   except:
     - tags
 
