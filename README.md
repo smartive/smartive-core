@@ -5,8 +5,6 @@ A small but useful .net core library with some helpers / additions / extensions 
 
 [![pipeline status](https://gitlab.com/smartive/open-source/smartive-core/badges/master/pipeline.svg)](https://gitlab.com/smartive/open-source/smartive-core/commits/master)
 [![nuget](https://img.shields.io/nuget/v/Smartive.Core.svg)](https://www.nuget.org/packages?q=smartive.core)
-[![branch coverage](https://gitlab.com/smartive/open-source/smartive-core/-/jobs/artifacts/master/raw/coverage/report/badge_branchcoverage.svg?job=test)](https://gitlab.com/smartive/open-source/smartive-core/-/jobs/artifacts/master/file/coverage/report/summary.htm?job=test)
-[![line coverage](https://gitlab.com/smartive/open-source/smartive-core/-/jobs/artifacts/master/raw/coverage/report/badge_linecoverage.svg?job=test)](https://gitlab.com/smartive/open-source/smartive-core/-/jobs/artifacts/master/file/coverage/report/summary.htm?job=test)
 
 ### Libs
 

@@ -7,6 +7,7 @@ image: mcr.microsoft.com/dotnet/core/sdk:3.0
 
 stages:
   - test
+  - test_report
   - release
   - deploy
 
@@ -15,8 +16,43 @@ stages:
 test:
   stage: test
   extends: .base
+  before_script:
+    - |
+      curl -u smartive-ci:$GH_TOKEN \
+        -X POST https://api.github.com/repos/smartive/smartive-core/statuses/$CI_COMMIT_SHA \
+        -H 'Content-Type: application/json' \
+        -d "{ \"state\": \"pending\", \"target_url\": \"$CI_PIPELINE_URL\", \"description\": \"executing build\", \"context\": \"gitlab-ci\"}" \
+      > /dev/null
   script:
     - ./build.sh --target Test
+  except:
+    - tags
+
+test success:
+  stage: test_report
+  extends: .base
+  script:
+    - |
+      curl -u smartive-ci:$GH_TOKEN \
+        -X POST https://api.github.com/repos/smartive/smartive-core/statuses/$CI_COMMIT_SHA \
+        -H 'Content-Type: application/json' \
+        -d "{ \"state\": \"success\", \"target_url\": \"$CI_PIPELINE_URL\", \"description\": \"build succeeded\", \"context\": \"gitlab-ci\"}" \
+      > /dev/null
+  when: on_success
+  except:
+    - tags
+
+test failure:
+  stage: test_report
+  extends: .base
+  script:
+    - |
+      curl -u smartive-ci:$GH_TOKEN \
+        -X POST https://api.github.com/repos/smartive/smartive-core/statuses/$CI_COMMIT_SHA \
+        -H 'Content-Type: application/json' \
+        -d "{ \"state\": \"failure\", \"target_url\": \"$CI_PIPELINE_URL\", \"description\": \"build failed\", \"context\": \"gitlab-ci\"}" \
+      > /dev/null
+  when: on_failure
   except:
     - tags
 
