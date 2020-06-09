@@ -4,12 +4,12 @@ using System.Linq;
 using Nuke.Common;
 using Nuke.Common.CI.GitLab;
 using Nuke.Common.Execution;
+using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
-using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [CheckBuildProjectConfigurations]
@@ -18,18 +18,13 @@ public class Build : NukeBuild
 {
     const string NugetSource = "https://www.nuget.org/api/v2/package";
 
-    /// Support plugins are available for:
-    ///   - JetBrains ReSharper        https://nuke.build/resharper
-    ///   - JetBrains Rider            https://nuke.build/rider
-    ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
-    ///   - Microsoft VSCode           https://nuke.build/vscode
     public static int Main() => Execute<Build>(x => x.Test);
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-    [Parameter("Version that is built. Needed for packaging. (format: x.x.x)")]
-    readonly string Version = GitLab.Instance?.CommitTag?.Substring(1);
+    [Parameter("Version that is built. Needed for packaging. (format: vx.x.x)")]
+    readonly string? Version = GitLab.Instance?.CommitTag;
 
     readonly string NugetKey = Environment.GetEnvironmentVariable("NUGET_KEY");
 
@@ -94,15 +89,14 @@ public class Build : NukeBuild
                 .EnableNoBuild()
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
-                .SetVersion(Version)
-                .SetFileVersion(Version)
-                .SetAssemblyVersion(Version)
+                .SetVersion(Version?.Substring(1) ?? "0.0.0")
+                .SetFileVersion(Version?.Substring(1) ?? "0.0.0")
+                .SetAssemblyVersion(Version?.Substring(1) ?? "0.0.0")
                 .CombineWith(SourceProjects, (ss, project) => ss
                     .SetProject(project)), Environment.ProcessorCount);
         });
 
     Target Publish => _ => _
-        .DependsOn(Pack)
         .Requires(() => NugetKey != default)
         .Executes(() =>
         {
