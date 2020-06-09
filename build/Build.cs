@@ -24,7 +24,7 @@ public class Build : NukeBuild
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
     [Parameter("Version that is built. Needed for packaging. (format: vx.x.x)")]
-    readonly string? Version = GitLab.Instance?.CommitTag;
+    readonly string Version = GitLab.Instance?.CommitTag;
 
     readonly string NugetKey = Environment.GetEnvironmentVariable("NUGET_KEY");
 
