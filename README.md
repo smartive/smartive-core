@@ -3,7 +3,6 @@
 A small but useful .net core library with some helpers / additions / extensions for your everyday work with
 .net core.
 
-[![pipeline status](https://gitlab.com/smartive/open-source/smartive-core/badges/master/pipeline.svg)](https://gitlab.com/smartive/open-source/smartive-core/commits/master)
 [![nuget](https://img.shields.io/nuget/v/Smartive.Core.svg)](https://www.nuget.org/packages?q=smartive.core)
 
 ### Libs

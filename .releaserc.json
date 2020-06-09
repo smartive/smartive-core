@@ -1,6 +1,21 @@
 {
-  "repositoryUrl": "https://github.com/smartive/smartive-core.git",
-  "verifyConditions": "@semantic-release/github",
-  "prepare": false,
-  "publish": "@semantic-release/github"
+  "verifyConditions": ["@semantic-release/github"],
+  "addChannel": ["@semantic-release/github"],
+  "prepare": [
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "./build.sh --no-logo --target Pack --configuration Release --version ${nextRelease.version}"
+      }
+    ]
+  ],
+  "publish": [
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "./build.sh --no-logo --target Publish"
+      }
+    ],
+    ["@semantic-release/github"]
+  ]
 }
