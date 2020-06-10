@@ -311,6 +311,11 @@ namespace Smartive.Core.Database.Repositories
         {
             foreach (var entity in entities)
             {
+                if (KeyComparer.Equals(entity.Id, default!))
+                {
+                    throw new ArgumentException("Id is set, cannot update. Use 'save' for create or update.");
+                }
+
                 if (IsTracked(entity, out var tracked))
                 {
                     if (tracked == null)

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Smartive.Core.Database.Models;
 using Smartive.Core.Database.Repositories;
 using Smartive.Core.Database.Test.Models;
 using Xunit;
@@ -683,6 +682,14 @@ namespace Smartive.Core.Database.Test.Repositories
         {
             Func<Task> action = async () => await _authors.Update((IEnumerable<Author>)null);
             action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void Test_Throw_On_Default_Id_Update()
+        {
+            var author = new Author { Name = "A1" };
+            Func<Task> action = async () => await _authors.Update(author);
+            action.Should().Throw<ArgumentException>();
         }
 
         [Fact]
