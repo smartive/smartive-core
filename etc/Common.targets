@@ -1,7 +1,7 @@
 ﻿<Project>
 
     <PropertyGroup>
-        <LangVersion>8</LangVersion>
+        <LangVersion>9</LangVersion>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <Authors>smartive AG</Authors>

@@ -1,22 +1,23 @@
-name: .NET Core Testing
+name: .Net Testing
 
 on:
   push:
     branches:
-      - '*'
+      - '**'
       - '!master'
   pull_request:
     branches:
-      - '*'
+      - '**'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
-      - name: Setup .NET Core
+      - name: Setup .Net
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1.201
+          dotnet-version: 5.0.100
       - name: Test
-        run: ./build.sh --target test --no-logo
+        run: ./build.sh --target Test --no-logo
