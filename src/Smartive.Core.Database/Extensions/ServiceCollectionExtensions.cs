@@ -28,7 +28,7 @@ namespace Smartive.Core.Database.Extensions
             collection.Add(
                 new ServiceDescriptor(
                     typeof(ICrudRepository<TEntity>),
-                    provider => new EfCrudRepository<TEntity, TContext>(provider.GetService<TContext>()),
+                    provider => new EfCrudRepository<TEntity, TContext>(provider.GetRequiredService<TContext>()),
                     lifetime));
 
             return collection;
@@ -54,7 +54,7 @@ namespace Smartive.Core.Database.Extensions
             collection.Add(
                 new ServiceDescriptor(
                     typeof(ICrudRepository<TKey, TEntity>),
-                    provider => new EfCrudRepository<TKey, TEntity, TContext>(provider.GetService<TContext>()),
+                    provider => new EfCrudRepository<TKey, TEntity, TContext>(provider.GetRequiredService<TContext>()),
                     lifetime));
 
             return collection;

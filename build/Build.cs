@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Nuke.Common;
-using Nuke.Common.CI.GitLab;
+using Nuke.Common.CI;
 using Nuke.Common.Execution;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -13,20 +14,19 @@ using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 [CheckBuildProjectConfigurations]
-[UnsetVisualStudioEnvironmentVariables]
-public class Build : NukeBuild
+[ShutdownDotNetAfterServerBuild]
+class Build : NukeBuild
 {
-    const string NugetSource = "https://www.nuget.org/api/v2/package";
+    const string NugetSource = "https://api.nuget.org/v3/index.json";
 
     public static int Main() => Execute<Build>(x => x.Test);
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-    [Parameter("Version that is built. Needed for packaging. (format: x.x.x)")]
-    readonly string Version = GitLab.Instance?.CommitTag?.Substring(1);
+    [Parameter("Version number that is built.")] readonly string Version = "0.0.0";
 
-    readonly string NugetKey = Environment.GetEnvironmentVariable("NUGET_KEY");
+    [CanBeNull] readonly string NugetKey = Environment.GetEnvironmentVariable("NUGET_KEY");
 
     [Solution] readonly Solution Solution;
 
@@ -80,24 +80,24 @@ public class Build : NukeBuild
                 .SetProjectFile(p))));
 
     Target Pack => _ => _
-        .DependsOn(Clean, Compile)
-        .Requires(() => Version != default)
+        .DependsOn(Clean)
+        .Requires(() => !string.IsNullOrWhiteSpace(Version))
         .Executes(() =>
         {
             Logger.Info($"Pack the projects for version {Version}");
             DotNetPack(s => s
-                .EnableNoBuild()
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
-                .SetVersion(Version ?? "0.0.0")
-                .SetFileVersion(Version ?? "0.0.0")
-                .SetAssemblyVersion(Version ?? "0.0.0")
+                .SetVersion(Version)
+                .SetFileVersion(Version)
+                .SetAssemblyVersion(Version)
+                .SetInformationalVersion(Version)
                 .CombineWith(SourceProjects, (ss, project) => ss
                     .SetProject(project)), Environment.ProcessorCount);
         });
 
     Target Publish => _ => _
-        .Requires(() => NugetKey != default)
+        .Requires(() => !string.IsNullOrWhiteSpace(NugetKey))
         .Executes(() =>
         {
             Logger.Info("Publish Packages");
